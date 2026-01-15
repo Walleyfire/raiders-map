@@ -2,41 +2,34 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <title>RAIDERS – Alue Map v2.2.0</title>
+  <title>RAIDERS – Alue Map v2.2.3</title>
   <link rel="icon" type="image/png" href="Raiders.png">
   <style>
     body { margin: 0; background:#0a0a0a; color:#eee; font-family: sans-serif; overflow: hidden; }
     
-    #info { 
-      padding: 0 20px; 
-      height: 60px;
-      background: rgba(10, 0, 0, 0.9); 
-      position: fixed; 
-      top: 0; left: 0; right: 0; 
-      z-index: 100; 
-      border-bottom: 2px solid #400000; 
-      display: flex; 
-      align-items: center; 
-      gap: 12px;
-      backdrop-filter: blur(10px);
+    /* PÄIVITYSILMOITUS */
+    #update-notice {
+      position: fixed; top: 60px; left: 0; right: 0;
+      background: #ff0000; color: white; text-align: center;
+      padding: 10px; z-index: 2000; font-weight: bold;
+      display: none; border-bottom: 2px solid white;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     }
 
-    /* LOGO JA VERSIO */
-    .logo-container { 
-      display: flex; 
-      align-items: baseline;
-      gap: 8px;
-      border-right: 2px solid #400000; 
-      padding-right: 15px; 
-      flex-shrink: 0; 
+    #info { 
+      padding: 0 20px; height: 60px; background: rgba(10, 0, 0, 0.9); 
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; 
+      border-bottom: 2px solid #400000; display: flex; align-items: center; 
+      gap: 12px; backdrop-filter: blur(10px);
     }
+
+    .logo-container { display: flex; align-items: baseline; gap: 8px; border-right: 2px solid #400000; padding-right: 15px; flex-shrink: 0; }
     .logo { color: #ff0000; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; font-style: italic; }
     .version-tag { color: #666; font-size: 11px; font-family: monospace; }
 
     #legendBox {
-      position: fixed; bottom: 20px; left: 20px;
-      background: rgba(10, 0, 0, 0.85); border: 1px solid #400000;
-      padding: 12px; border-radius: 8px; z-index: 90;
+      position: fixed; bottom: 20px; left: 20px; background: rgba(10, 0, 0, 0.85); 
+      border: 1px solid #400000; padding: 12px; border-radius: 8px; z-index: 90;
       backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 8px; pointer-events: none;
     }
     .legend-title { color: #ff0000; font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #300000; padding-bottom: 4px; }
@@ -47,7 +40,6 @@
     .is-admin .admin-only { display: flex !important; align-items: center; gap: 10px; }
 
     .cal-group { border-right: 1px solid #400000; padding-right: 15px; display: flex; align-items: center; }
-
     input { background: #000; color: #00ff00; border: 1px solid #300000; width: 55px; padding: 4px; font-family: monospace; text-align: center; font-size: 12px; }
     button { background: #220000; color: white; border: 1px solid #500000; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 13px; }
     button:hover { background: #400000; border-color: #ff0000; }
@@ -76,6 +68,8 @@
 </head>
 <body id="mainBody">
 
+<div id="update-notice">⚠️ UUSI PÄIVITYS SAATAVILLA! Paina CTRL + F5 tyhjentääksesi välimuistin.</div>
+
 <div id="legendBox">
     <div class="legend-title">RAIDERS INFO</div>
     <div class="legend-item">🌿 <span style="color: #00ff00;">Istutuspaikka</span></div>
@@ -99,7 +93,7 @@
 <div id="info">
   <div class="logo-container">
     <div class="logo">RAIDERS</div>
-    <div class="version-tag">v2.2.1</div>
+    <div class="version-tag">v2.2.3</div>
   </div>
 
   <div class="admin-only cal-group">
@@ -138,6 +132,8 @@
     <div class="swatch" style="background: #444; display:flex; align-items:center; justify-content:center; font-size:10px;" data-color="erase">❌</div>
   </div>
 
+  <button id="pushVersionBtn" class="admin-only" style="background:#400; font-size:10px;">Push v2.2.3</button>
+
   <div class="right-section">
       <div id="coords-display"><span class="label-small">Sijainti</span><span id="coords-val">---- , ----</span></div>
       <div class="point-box"><span class="label-small">Hallinta</span><span id="areaPoints">0 aluetta</span></div>
@@ -151,6 +147,9 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  // VERSIONHALLINTA
+  const CURRENT_VERSION = "v2.2.3";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDNRDRwOQEnNDVeFIZe4no7wvOdHnpyfvY",
@@ -202,6 +201,23 @@
     document.getElementById('mainBody').classList.toggle('is-admin', userLoggedIn); 
     document.getElementById('authBtn').innerText = u ? "Ulos" : "Admin";
   });
+
+  // VERSIONTARKISTUS FIREBASESTA
+  onValue(ref(db, 'live_map/version'), (snap) => {
+    const latest = snap.val();
+    if (latest && latest !== CURRENT_VERSION) {
+      document.getElementById('update-notice').style.display = 'block';
+    } else {
+      document.getElementById('update-notice').style.display = 'none';
+    }
+  });
+
+  // PUSH TOIMINTO
+  document.getElementById('pushVersionBtn').onclick = () => {
+    if(confirm("Päivitetäänkö versio " + CURRENT_VERSION + " kaikille?")) {
+      set(ref(db, 'live_map/version'), CURRENT_VERSION).then(() => showToast("Versio " + CURRENT_VERSION + " työnnetty!"));
+    }
+  };
 
   document.getElementById('authBtn').onclick = () => { 
     if (userLoggedIn) { 
@@ -300,7 +316,7 @@
 
   document.getElementById('gridMoveBtn').onclick = () => { gridMoveMode = !gridMoveMode; markerMode = false; document.getElementById('markerTools').style.display = 'none'; document.getElementById('gridMoveBtn').classList.toggle('active', gridMoveMode); draw(); };
   document.getElementById('confirmAreaBtn').onclick = () => { if (selectedGrid.gx !== null && userLoggedIn) { const key = `${selectedGrid.gx},${selectedGrid.gy}`; if (currentColor === "erase") remove(ref(db, `live_map/areas/${key}`)); else set(ref(db, `live_map/areas/${key}`), { color: currentColor }); } };
-  document.getElementById('calBtn').onclick = () => { if (userLoggedIn && selectedGrid.gx !== null) update(ref(db, 'live_map'), { anchor: { gx: selectedGrid.gx, gy: selectedGrid.gy }, baseX: parseInt(document.getElementById('baseXInput').value), baseY: parseInt(document.getElementById('baseYInput').value) }).then(() => showToast("Korkeus kalibroitu!")); };
+  document.getElementById('calBtn').onclick = () => { if (userLoggedIn && selectedGrid.gx !== null) update(ref(db, 'live_map'), { anchor: { gx: selectedGrid.gx, gy: selectedGrid.gy }, baseX: parseInt(document.getElementById('baseXInput').value), baseY: parseInt(document.getElementById('baseYInput').value) }).then(() => showToast("Kalibroitu!")); };
   document.querySelectorAll('.swatch').forEach(s => s.onclick = () => { document.querySelectorAll('.swatch').forEach(w => w.classList.remove('active')); s.classList.add('active'); currentColor = s.dataset.color; });
   
   window.onresize = () => draw();
