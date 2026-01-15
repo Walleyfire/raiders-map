@@ -2,12 +2,11 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <title>RAIDERS – Alue Map v2.1.3</title>
+  <title>RAIDERS – Alue Map v2.2.0</title>
   <link rel="icon" type="image/png" href="Raiders.png">
   <style>
     body { margin: 0; background:#0a0a0a; color:#eee; font-family: sans-serif; overflow: hidden; }
     
-    /* PÄIVITETTY YLÄPALKKI - VÄLJEMPI JA DYNAAMINEN */
     #info { 
       padding: 0 20px; 
       height: 60px;
@@ -18,83 +17,76 @@
       border-bottom: 2px solid #400000; 
       display: flex; 
       align-items: center; 
-      gap: 20px;
+      gap: 12px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-      overflow-x: auto; /* Mahdollistaa rullauksen jos tila loppuu */
     }
 
+    /* LOGO JA VERSIO */
     .logo-container { 
       display: flex; 
-      align-items: baseline; 
+      align-items: baseline;
+      gap: 8px;
       border-right: 2px solid #400000; 
-      padding-right: 15px;
-      flex-shrink: 0;
+      padding-right: 15px; 
+      flex-shrink: 0; 
     }
-    .logo { color: #ff0000; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-style: italic; text-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
-    .version-tag { color: #555; font-size: 10px; font-family: monospace; margin-left: 5px; }
+    .logo { color: #ff0000; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; font-style: italic; }
+    .version-tag { color: #666; font-size: 11px; font-family: monospace; }
+
+    #legendBox {
+      position: fixed; bottom: 20px; left: 20px;
+      background: rgba(10, 0, 0, 0.85); border: 1px solid #400000;
+      padding: 12px; border-radius: 8px; z-index: 90;
+      backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+    }
+    .legend-title { color: #ff0000; font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #300000; padding-bottom: 4px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: bold; }
 
     canvas { display: block; cursor: crosshair; image-rendering: pixelated; }
-
-    /* Admin-työkalujen hallinta */
     .admin-only { display: none !important; } 
-    .is-admin .admin-only { display: flex !important; align-items: center; gap: 12px; }
+    .is-admin .admin-only { display: flex !important; align-items: center; gap: 10px; }
 
-    /* Elementtien ryhmittely */
-    .input-group, .point-box, #coords-display { 
-      background: #1a0000; 
-      border: 1px solid #400000; 
-      border-radius: 4px; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-      flex-shrink: 0;
-    }
+    .cal-group { border-right: 1px solid #400000; padding-right: 15px; display: flex; align-items: center; }
 
-    input { background: #000; color: #00ff00; border: 1px solid #300000; width: 60px; padding: 4px; font-family: monospace; text-align: center; }
-    button { background: #220000; color: white; border: 1px solid #500000; padding: 8px 14px; cursor: pointer; border-radius: 4px; font-weight: bold; white-space: nowrap; }
+    input { background: #000; color: #00ff00; border: 1px solid #300000; width: 55px; padding: 4px; font-family: monospace; text-align: center; font-size: 12px; }
+    button { background: #220000; color: white; border: 1px solid #500000; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 13px; }
     button:hover { background: #400000; border-color: #ff0000; }
     
     #confirmAreaBtn { background: #1b5e20; border: 1px solid #2ecc71; }
     #gridMoveBtn.active, #markerToggle.active { background: #e67e22; color: #fff; border-color: white; }
 
-    #markerTools { gap: 8px; background: #1a0000; padding: 5px 10px; border-radius: 4px; border: 1px solid #444; display: none; align-items: center; flex-shrink: 0; }
+    #markerTools { gap: 8px; background: #1a0000; padding: 5px; border-radius: 4px; border: 1px solid #444; display: none; align-items: center; }
     .m-tool { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 3px; background: #333; border: 1px solid #444; }
     .m-tool.active { border-color: white; box-shadow: 0 0 8px #fff; }
 
-    /* Säädinpalkki */
-    .slider-box { padding: 0 15px; border-left: 1px solid #400000; border-right: 1px solid #400000; }
+    .color-picker { display: flex; gap: 6px; padding: 0 10px; border-left: 1px solid #400000; }
+    .swatch { width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid #222; transition: transform 0.1s; }
+    .swatch:hover { transform: scale(1.1); }
+    .swatch.active { border-color: white; box-shadow: 0 0 5px white; transform: scale(1.1); }
 
-    /* OIKEA REUNA */
-    .right-section {
-      margin-left: auto; /* Työntää kaiken oikealle */
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      flex-shrink: 0;
-    }
+    .right-section { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    #coords-display { color: #00ff00; font-size: 14px; background: #1a0000; border: 1px solid #400000; border-radius: 4px; padding: 4px 12px; min-width: 140px; text-align: center; }
+    .point-box { color: #fff; background: #1a0000; border: 1px solid #400000; border-radius: 4px; padding: 4px 12px; min-width: 90px; text-align: center; }
+    .label-small { color: #a0a0a0; font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; display: block; }
 
-    #coords-display { color: #00ff00; font-size: 15px; padding: 4px 15px; min-width: 160px; text-align: center; }
-    .point-box { color: #fff; padding: 4px 15px; min-width: 100px; text-align: center; }
-    .label-small { color: #a0a0a0; font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
-
-    /* Muut paneelit */
     #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
     .login-card { background: #0A0000; padding: 30px; border: 2px solid #400000; border-radius: 8px; width: 300px; display: flex; flex-direction: column; gap: 15px; }
-    #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #400000; color: #fff; padding: 12px 30px; border-radius: 50px; z-index: 10000; display: none; border: 1px solid #f00; font-weight: bold; box-shadow: 0 0 20px rgba(255,0,0,0.4); }
-    
-    .color-picker { display: flex; gap: 8px; padding: 0 10px; }
-    .swatch { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid #222; }
-    .swatch.active { border-color: white; transform: scale(1.1); }
+    #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #400000; color: #fff; padding: 12px 30px; border-radius: 50px; z-index: 10000; display: none; border: 1px solid #f00; font-weight: bold; }
   </style>
 </head>
 <body id="mainBody">
 
+<div id="legendBox">
+    <div class="legend-title">RAIDERS INFO</div>
+    <div class="legend-item">🌿 <span style="color: #00ff00;">Istutuspaikka</span></div>
+    <div class="legend-item">🔥 <span style="color: #ff8c00;">Kasvi kasvaa</span></div>
+</div>
+
 <div id="loginOverlay">
     <div class="login-card">
         <h2 style="color:red; text-align:center; margin-top:0;">ADMIN LOGIN</h2>
-        <div><span class="label-small">Sähköposti</span><input type="email" id="loginEmail" value="@raid.com" style="width:100%; box-sizing:border-box;"></div>
-        <div><span class="label-small">Salasana</span><input type="password" id="loginPass" placeholder="••••••••" style="width:100%; box-sizing:border-box;"></div>
+        <div><span class="label-small">Sähköposti</span><input type="email" id="loginEmail" value="@raid.com" style="width:100%; box-sizing:border-box; background:#000; color:#fff; border:1px solid #400000; padding:8px;"></div>
+        <div><span class="label-small">Salasana</span><input type="password" id="loginPass" placeholder="••••••••" style="width:100%; box-sizing:border-box; background:#000; color:#fff; border:1px solid #400000; padding:8px;"></div>
         <div style="display:flex; gap: 10px; margin-top:10px;">
             <button id="doLogin" style="flex: 2; background: #400000;">Kirjaudu</button>
             <button id="closeLogin" style="flex: 1;">Sulje</button>
@@ -107,43 +99,47 @@
 <div id="info">
   <div class="logo-container">
     <div class="logo">RAIDERS</div>
-    <div class="version-tag">v2.1.3</div>
+    <div class="version-tag">v2.2.1</div>
+  </div>
+
+  <div class="admin-only cal-group">
+      <div style="display:flex; gap: 8px; align-items: center;">
+          <div style="display:flex; flex-direction:column; align-items:center;"><span class="label-small">Base X</span><input type="number" id="baseXInput" value="1700"></div>
+          <div style="display:flex; flex-direction:column; align-items:center;"><span class="label-small">Base Y</span><input type="number" id="baseYInput" value="3700"></div>
+          <button id="calBtn" style="margin-top:12px;">🔧 Kalibroi</button>
+      </div>
   </div>
   
   <button id="confirmAreaBtn" class="admin-only">✅ Vahvista</button>
   <button id="gridMoveBtn" class="admin-only">▦ Kohdista</button>
   
-  <div class="admin-only slider-box">
+  <div class="admin-only" style="padding: 0 15px; border-right: 1px solid #400000; display: flex; flex-direction: column; align-items: center;">
     <span class="label-small">Ruudun koko</span>
-    <div style="display:flex; align-items:center; gap:10px;">
-        <input type="range" id="gridSizeSlider" min="5" max="150" value="25" style="width:100px; accent-color:red;">
-        <span id="gridSizeVal" style="color:#0f0; font-size:12px; font-family:monospace; min-width:35px;">25px</span>
+    <div style="display:flex; align-items:center; gap:8px;">
+        <input type="range" id="gridSizeSlider" min="5" max="150" value="25" style="width:70px; accent-color:red;">
+        <span id="gridSizeVal" style="color:#0f0; font-size:11px; font-family:monospace; min-width: 30px;">25px</span>
     </div>
   </div>
 
   <button id="markerToggle" class="admin-only">📍 Marker</button>
   <div id="markerTools">
-      <div class="m-tool active" id="mGreen" title="Vihreä Marker">🌿</div>
-      <div class="m-tool" id="mOrange" title="Oranssi Marker">🔥</div>
-      <div class="m-tool" id="mEraser" title="Poista">❌</div>
+      <div class="m-tool active" id="mGreen">🌿</div>
+      <div class="m-tool" id="mOrange">🔥</div>
+      <div class="m-tool" id="mEraser">❌</div>
   </div>
   
   <div id="adminTools" class="admin-only color-picker">
     <div class="swatch active" style="background: rgba(0, 255, 0, 0.5);" data-color="rgba(0, 255, 0, 0.5)"></div>
     <div class="swatch" style="background: rgba(255, 0, 0, 0.5);" data-color="rgba(255, 0, 0, 0.5)"></div>
     <div class="swatch" style="background: rgba(0, 150, 255, 0.5);" data-color="rgba(0, 150, 255, 0.5)"></div>
+    <div class="swatch" style="background: rgba(255, 255, 0, 0.5);" data-color="rgba(255, 255, 0, 0.5)"></div>
+    <div class="swatch" style="background: rgba(155, 0, 255, 0.5);" data-color="rgba(155, 0, 255, 0.5)"></div>
+    <div class="swatch" style="background: rgba(255, 140, 0, 0.5);" data-color="rgba(255, 140, 0, 0.5)"></div>
     <div class="swatch" style="background: #444; display:flex; align-items:center; justify-content:center; font-size:10px;" data-color="erase">❌</div>
   </div>
 
   <div class="right-section">
       <div id="coords-display"><span class="label-small">Sijainti</span><span id="coords-val">---- , ----</span></div>
-      
-      <div class="admin-only input-group" style="padding: 4px 10px; flex-direction: row; gap: 8px;">
-        <div style="display:flex; flex-direction:column; align-items:center;"><span class="label-small">X</span><input type="number" id="baseXInput" value="1700"></div>
-        <div style="display:flex; flex-direction:column; align-items:center;"><span class="label-small">Y</span><input type="number" id="baseYInput" value="3700"></div>
-        <button id="calBtn" style="padding:4px 8px; margin-top:10px;">🔧</button>
-      </div>
-
       <div class="point-box"><span class="label-small">Hallinta</span><span id="areaPoints">0 aluetta</span></div>
       <button id="authBtn">Admin</button>
   </div>
@@ -174,19 +170,26 @@
   let userLoggedIn = false, gridMoveMode = false, markerMode = false, markerEraser = false;
   let activeMarkerColor = "#006400", isDragging = false, isDraggingGrid = false;
   let capturedAreas = {}, freeMarkers = {}, gridOffset = { x: 0, y: 0 }, calAnchor = { gx: 0, gy: 0 };
-  
-  const tiles = [];
-  const TILE_SIZE = 1024;
-  let loadedTiles = 0, scale = 0.12, offsetX = 100, offsetY = 100, lastMouse = { x: 0, y: 0 };
+  let loadedTiles = 0, scale = 0.15, offsetX = 0, offsetY = 0, lastMouse = { x: 0, y: 0 };
   let selectedGrid = { gx: null, gy: null }, currentColor = "rgba(0, 255, 0, 0.5)", GRID_SIZE = 25; 
 
+  const tiles = [];
   for (let y = 0; y < 8; y++) {
     for (let x = 0; x < 8; x++) {
       const img = new Image();
       img.src = `gta_karttapalat/tile_${x}_${y}.png`;
-      img.onload = () => { loadedTiles++; if(loadedTiles === 64) draw(); };
+      img.onload = () => { 
+        loadedTiles++; 
+        if(loadedTiles === 64) { centerMap(); draw(); } 
+      };
       tiles.push({ img, x, y });
     }
+  }
+
+  function centerMap() {
+    scale = 0.15;
+    offsetX = (window.innerWidth / 2) - (4096 * scale);
+    offsetY = (window.innerHeight / 2) - (4096 * scale);
   }
 
   function showToast(msg) {
@@ -194,7 +197,6 @@
     toast.innerText = msg; toast.style.display = 'block'; setTimeout(() => { toast.style.display = 'none'; }, 3000);
   }
 
-  // --- ADMIN LOGIIKKA ---
   onAuthStateChanged(auth, u => { 
     userLoggedIn = !!u; 
     document.getElementById('mainBody').classList.toggle('is-admin', userLoggedIn); 
@@ -203,20 +205,17 @@
 
   document.getElementById('authBtn').onclick = () => { 
     if (userLoggedIn) { 
-        if (confirm("Kirjaudu ulos?")) {
-            signOut(auth).then(() => { showToast("Kirjauduttu ulos."); gridMoveMode = false; markerMode = false; draw(); });
-        }
+        if (confirm("Kirjaudu ulos?")) signOut(auth).then(() => { showToast("Uloskirjaus."); gridMoveMode = false; markerMode = false; draw(); });
     } else { document.getElementById('loginOverlay').style.display = 'flex'; }
   };
 
   document.getElementById('doLogin').onclick = () => { 
     signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value)
       .then(() => { document.getElementById('loginOverlay').style.display = 'none'; showToast("Tervetuloa!"); })
-      .catch(() => alert("Virhe kirjautumisessa."));
+      .catch(() => alert("Kirjautumisvirhe."));
   };
   document.getElementById('closeLogin').onclick = () => document.getElementById('loginOverlay').style.display = 'none';
 
-  // --- MARKERIT ---
   function updateMarkerUI(id) {
     document.querySelectorAll('.m-tool').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -233,7 +232,6 @@
     draw();
   };
 
-  // --- GRID ---
   const gridSizeSlider = document.getElementById('gridSizeSlider');
   const gridSizeVal = document.getElementById('gridSizeVal');
   gridSizeSlider.oninput = () => { GRID_SIZE = parseInt(gridSizeSlider.value); gridSizeVal.innerText = GRID_SIZE + "px"; draw(); };
@@ -244,9 +242,7 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save(); ctx.translate(offsetX, offsetY); ctx.scale(scale, scale);
     ctx.imageSmoothingEnabled = false;
-
-    if (loadedTiles > 0) tiles.forEach(t => ctx.drawImage(t.img, t.x * TILE_SIZE, t.y * TILE_SIZE, TILE_SIZE + 0.5, TILE_SIZE + 0.5));
-
+    tiles.forEach(t => ctx.drawImage(t.img, t.x * 1024, t.y * 1024, 1024.5, 1024.5));
     const GAP = 0.5, DRAW_SIZE = GRID_SIZE - (GAP * 2);
     if (gridMoveMode) {
         ctx.beginPath(); ctx.strokeStyle = "rgba(255, 165, 0, 0.6)"; ctx.lineWidth = 1.5/scale;
@@ -272,7 +268,6 @@
     const worldX = (e.clientX - offsetX) / scale, worldY = (e.clientY - offsetY) / scale;
     if (gridMoveMode && e.button === 0) { isDraggingGrid = true; lastMouse = { x: e.clientX, y: e.clientY }; return; }
     if (e.button === 2) { isDragging = true; lastMouse = { x: e.clientX, y: e.clientY }; return; }
-    
     if (userLoggedIn && markerMode) {
         if (markerEraser) { 
             for (let id in freeMarkers) { if (Math.hypot(freeMarkers[id].x - worldX, freeMarkers[id].y - worldY) < 20/scale) { remove(ref(db, `live_map/free_markers/${id}`)); break; } } 
@@ -281,7 +276,7 @@
     }
     const gx = Math.floor((worldX - gridOffset.x) / GRID_SIZE), gy = Math.floor((worldY - gridOffset.y) / GRID_SIZE);
     selectedGrid = { gx, gy }; 
-    const bX = parseInt(document.getElementById('baseXInput').value) || 0, bY = parseInt(document.getElementById('baseYInput').value) || 0;
+    const bX = parseInt(document.getElementById('baseXInput').value) || 1700, bY = parseInt(document.getElementById('baseYInput').value) || 3700;
     document.getElementById('coords-val').innerText = `${Math.round(bX + (gx - calAnchor.gx) * 100)} , ${Math.round(bY + (calAnchor.gy - gy) * 100)}`;
     draw();
   });
@@ -303,9 +298,9 @@
     draw();
   });
 
-  document.getElementById('gridMoveBtn').onclick = () => { gridMoveMode = !gridMoveMode; markerMode = false; document.getElementById('markerTools').style.display = 'none'; document.getElementById('gridMoveBtn').classList.toggle('active', gridMoveMode); document.getElementById('markerToggle').classList.remove('active'); draw(); };
+  document.getElementById('gridMoveBtn').onclick = () => { gridMoveMode = !gridMoveMode; markerMode = false; document.getElementById('markerTools').style.display = 'none'; document.getElementById('gridMoveBtn').classList.toggle('active', gridMoveMode); draw(); };
   document.getElementById('confirmAreaBtn').onclick = () => { if (selectedGrid.gx !== null && userLoggedIn) { const key = `${selectedGrid.gx},${selectedGrid.gy}`; if (currentColor === "erase") remove(ref(db, `live_map/areas/${key}`)); else set(ref(db, `live_map/areas/${key}`), { color: currentColor }); } };
-  document.getElementById('calBtn').onclick = () => { if (userLoggedIn && selectedGrid.gx !== null) update(ref(db, 'live_map'), { anchor: { gx: selectedGrid.gx, gy: selectedGrid.gy }, baseX: parseInt(document.getElementById('baseXInput').value), baseY: parseInt(document.getElementById('baseYInput').value) }).then(() => showToast("🔧 Kalibroitu!")); };
+  document.getElementById('calBtn').onclick = () => { if (userLoggedIn && selectedGrid.gx !== null) update(ref(db, 'live_map'), { anchor: { gx: selectedGrid.gx, gy: selectedGrid.gy }, baseX: parseInt(document.getElementById('baseXInput').value), baseY: parseInt(document.getElementById('baseYInput').value) }).then(() => showToast("Korkeus kalibroitu!")); };
   document.querySelectorAll('.swatch').forEach(s => s.onclick = () => { document.querySelectorAll('.swatch').forEach(w => w.classList.remove('active')); s.classList.add('active'); currentColor = s.dataset.color; });
   
   window.onresize = () => draw();
