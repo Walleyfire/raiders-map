@@ -40,6 +40,7 @@
         🌿 = Kasvi paikka (Pysyvä)<br>
         🔥 = Kasvaa (14h laskuri)<br>
         ✅ = Valmis kerättäväksi<br>
+        🍍 = Ananas kasvaa <br>
         <hr style="border:0; border-top:1px solid #333; margin:5px 0;">
         <span style="color:#0f0; font-size:10px;">Vie hiiri päälle nähdäksesi kellonajat.</span>
     </div>
@@ -51,7 +52,7 @@
 
 <div id="loginOverlay"><div class="login-card"><h2>ADMIN LOGIN</h2><input type="email" id="loginEmail" placeholder="Sähköposti" value="admin@raid.com"><input type="password" id="loginPass" placeholder="Salasana"><button id="doLogin">KIRJAUDU</button></div></div>
 <div id="header">
-    <div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.1</span></div>
+    <div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.2</span></div>
     <div style="display:flex; gap:10px; align-items:center;">
         <div id="coords-val" style="font-family:monospace; color:#0f0; background:#111; padding:8px; border:1px solid #333; border-radius:4px; min-width:120px; text-align:center;">0, 0</div>
         <button id="authBtn" style="background:#400000; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer;">Admin</button>
@@ -73,10 +74,11 @@
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
           <button class="m-selector tool-btn" data-type="green">🌿 Kasvi paikka</button>
           <button class="m-selector tool-btn" data-type="orange">🔥 Kasvaa</button>
+          <button class="m-selector tool-btn" data-type="yellow">🍍 Kasvaa</button>
       </div>
       <button class="m-selector tool-btn" data-type="erase">❌ Poista</button>
   </div>
-  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.1</button>
+  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.2</button>
 </div>
 
 <canvas id="map"></canvas>
@@ -94,7 +96,7 @@
   const canvas = document.getElementById('map');
   const ctx = canvas.getContext('2d');
 
-  const CURRENT_VERSION = "v2.3.1";
+  const CURRENT_VERSION = "v2.3.2";
 
   let userLoggedIn = false, gridMoveMode = false, markerMode = "none", capturedAreas = {}, freeMarkers = {}, gridOffset = {x:0, y:0}, scale = 0.15, offsetX = 0, offsetY = 0, lastMouse = {x:0, y:0}, isDragging = false, isDraggingGrid = false, selectedGrid = {gx:null, gy:null}, currentColor = "rgba(0, 255, 0, 0.5)", GRID_SIZE = 25, bX = 1700, bY = 3700, hoverMarker = null;
 
@@ -125,7 +127,7 @@
     for (let id in freeMarkers) {
         const m = freeMarkers[id]; let emoji = ""; let col = "";
         const hoursPassed = (Date.now() - m.createdAt) / 3600000;
-        if (m.type === "orange") { if (hoursPassed >= 14) { emoji = "✅"; col = "#2ecc71"; } else { emoji = "🔥"; col = "#e67e22"; } } else { emoji = "🌿"; col = "#27ae60"; }
+        if (m.type === "orange") { if (hoursPassed >= 14) { emoji = "✅"; col = "#2ecc71"; } else { emoji = "🔥,🍍"; col = "#e67e22"; } } else { emoji = "🌿"; col = "#27ae60"; }
         ctx.fillStyle = col; ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = "white"; ctx.lineWidth = 1/scale; ctx.stroke();
         ctx.font = `${16/scale}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(emoji, m.x, m.y);
@@ -221,4 +223,5 @@
 </script>
 </body>
 </html>
+
 
