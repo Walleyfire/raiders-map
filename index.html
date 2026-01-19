@@ -2,9 +2,10 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <title>RAIDERS - Alue Map</title>
+  <title>RAIDERS – Alue Map</title>
   <style>
     body { margin: 0; background:#0a0a0a; color:#eee; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+    #versionWarning { position: fixed; top: 65px; left: 0; right: 0; background: #ff0000; color: #fff; text-align: center; padding: 10px; font-weight: bold; z-index: 2000; display: none; box-shadow: 0 4px 15px rgba(255,0,0,0.5); border-bottom: 2px solid #fff; }
     #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 5000; display: none; }
     .login-card { background: #0d0000; border: 2px solid #600000; padding: 40px; border-radius: 12px; width: 320px; text-align: center; box-shadow: 0 0 40px rgba(255, 0, 0, 0.3); }
     .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #400000; background: #000; color: #0f0; outline: none; box-sizing: border-box; }
@@ -16,7 +17,7 @@
     .panel-section { border-bottom: 1px solid #300000; padding-bottom: 10px; }
     .section-title { color: #e67e22; font-size: 10px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
     .tool-btn { background: #220000; color: white; border: 1px solid #500000; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 11px; font-weight: bold; width: 100%; margin-bottom: 4px; }
-    .tool-btn.active { background: #e67e22; color: #000; border-color: #fff; }
+    .tool-btn.active { background: #e67e22 !important; color: #000 !important; border-color: #fff !important; }
     .coord-input { width: 48%; padding: 5px; background: #000; border: 1px solid #555; color: #0f0; font-family: monospace; font-size: 12px; margin-bottom: 5px; }
     .swatch { width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 1px solid #000; }
     .swatch.active { border: 2px solid white; box-shadow: 0 0 10px white; }
@@ -28,16 +29,18 @@
   </style>
 </head>
 <body id="mainBody">
+
+<div id="versionWarning">⚠️ KARTASTA ON UUSI VERSIO! Päivitä sivu painamalla CTRL + F5 ⚠️</div>
 <div id="toast"></div>
 
 <div id="bottomLeftUI">
     <div class="glass-box">
         <span class="legend-title">INFO</span>
-        🌿 = Kasvatus alue (Pysyvä)<br>
+        🌿 = Kasvi paikka (Pysyvä)<br>
         🔥 = Kasvaa (14h laskuri)<br>
         ✅ = Valmis kerättäväksi<br>
         <hr style="border:0; border-top:1px solid #333; margin:5px 0;">
-        <span style="color:#0f0; font-size:10px;">Vie hiiri päälle nähdäksesi kellonajat ja jäljellä olevan ajan.</span>
+        <span style="color:#0f0; font-size:10px;">Vie hiiri päälle nähdäksesi kellonajat.</span>
     </div>
     <div class="glass-box" style="text-align:center; border-color: #0f0;">
         <span id="areaCount" style="color:#0f0; font-size:16px; font-weight:bold;">0</span><br>
@@ -46,7 +49,13 @@
 </div>
 
 <div id="loginOverlay"><div class="login-card"><h2>ADMIN LOGIN</h2><input type="email" id="loginEmail" placeholder="Sähköposti" value="admin@raid.com"><input type="password" id="loginPass" placeholder="Salasana"><button id="doLogin">KIRJAUDU</button></div></div>
-<div id="header"><div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.0</span></div><div style="display:flex; gap:10px; align-items:center;"><div id="coords-val" style="font-family:monospace; color:#0f0; background:#111; padding:8px; border:1px solid #333; border-radius:4px; min-width:120px; text-align:center;">0, 0</div><button id="authBtn" style="background:#400000; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer;">Admin</button></div></div>
+<div id="header">
+    <div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.1</span></div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <div id="coords-val" style="font-family:monospace; color:#0f0; background:#111; padding:8px; border:1px solid #333; border-radius:4px; min-width:120px; text-align:center;">0, 0</div>
+        <button id="authBtn" style="background:#400000; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer;">Admin</button>
+    </div>
+</div>
 
 <div id="adminSidePanel">
   <div class="panel-section"><div class="section-title">Valtaus</div><button id="confirmAreaBtn" class="tool-btn" style="background:#1b5e20;">TALLENNA RUUTU</button><div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;" id="colorPicker"></div></div>
@@ -58,8 +67,15 @@
     <input type="range" id="gsSlider" min="10" max="100" value="25" style="width:100%; margin-top:10px;">
     <div style="text-align:center; font-size:10px; color:#888;">RUUDUN KOKO: <span id="gsVal">25px</span></div>
   </div>
-  <div class="panel-section"><div class="section-title">Markkerit</div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;"><button class="m-selector tool-btn" data-type="green">🌿 Kasvi alue</button><button class="m-selector tool-btn" data-type="orange">🔥 KASVAA</button></div><button class="m-selector tool-btn" data-type="erase">❌ POISTA</button></div>
-  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.0</button>
+  <div class="panel-section">
+      <div class="section-title">Markkerit</div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
+          <button class="m-selector tool-btn" data-type="green">🌿 Kasvi paikka</button>
+          <button class="m-selector tool-btn" data-type="orange">🔥 Kasvaa</button>
+      </div>
+      <button class="m-selector tool-btn" data-type="erase">❌ Poista</button>
+  </div>
+  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.1</button>
 </div>
 
 <canvas id="map"></canvas>
@@ -76,6 +92,8 @@
   const dataRef = ref(db, 'live_map');
   const canvas = document.getElementById('map');
   const ctx = canvas.getContext('2d');
+
+  const CURRENT_VERSION = "v2.3.1";
 
   let userLoggedIn = false, gridMoveMode = false, markerMode = "none", capturedAreas = {}, freeMarkers = {}, gridOffset = {x:0, y:0}, scale = 0.15, offsetX = 0, offsetY = 0, lastMouse = {x:0, y:0}, isDragging = false, isDraggingGrid = false, selectedGrid = {gx:null, gy:null}, currentColor = "rgba(0, 255, 0, 0.5)", GRID_SIZE = 25, bX = 1700, bY = 3700, hoverMarker = null;
 
@@ -120,35 +138,26 @@
         const diffMs = (created + (14 * 3600000)) - now;
         const date = new Date(created);
         const timeStr = `Luotu: ${date.toLocaleDateString('fi-FI')} klo ${date.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}`;
-        
         ctx.font = "bold 13px Segoe UI";
         let lines = [];
         if (hoverMarker.type === "orange" && diffMs > 0) {
-            const h = Math.floor(diffMs / 3600000);
-            const m = Math.floor((diffMs % 3600000) / 60000);
+            const h = Math.floor(diffMs / 3600000); const m = Math.floor((diffMs % 3600000) / 60000);
             lines.push(`Valmis: ${h}h ${m}m`);
         }
         lines.push(timeStr);
-
         const padding = 10; const lineHeight = 18;
         let maxWidth = 0; lines.forEach(l => { maxWidth = Math.max(maxWidth, ctx.measureText(l).width); });
-
         ctx.fillStyle = "rgba(0,0,0,0.95)"; ctx.strokeStyle = "#ff0000"; ctx.lineWidth = 2;
         const boxW = maxWidth + (padding * 2); const boxH = (lines.length * lineHeight) + padding;
         ctx.fillRect(lastMouse.x + 15, lastMouse.y - 15, boxW, boxH);
         ctx.strokeRect(lastMouse.x + 15, lastMouse.y - 15, boxW, boxH);
-
         ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.textBaseline = "top";
         lines.forEach((line, i) => {
-            if(i === 0 && lines.length > 1) ctx.fillStyle = "#e67e22";
-            else ctx.fillStyle = "#fff";
+            ctx.fillStyle = (i === 0 && lines.length > 1) ? "#e67e22" : "#fff";
             ctx.fillText(line, lastMouse.x + 15 + padding, lastMouse.y - 15 + padding/2 + (i * lineHeight));
         });
     }
   }
-
-  document.getElementById('gsSlider').oninput = (e) => { GRID_SIZE = parseInt(e.target.value); document.getElementById('gsVal').innerText = GRID_SIZE+"px"; draw(); };
-  document.getElementById('gsSlider').onchange = () => { if(userLoggedIn) update(ref(db, 'live_map'), { current_grid_size: GRID_SIZE }); };
 
   window.onmousemove = (e) => {
     const wx = (e.clientX - offsetX)/scale, wy = (e.clientY - offsetY)/scale;
@@ -163,6 +172,7 @@
     const wx = (e.clientX - offsetX)/scale, wy = (e.clientY - offsetY)/scale;
     if (e.button === 2) { isDragging = true; lastMouse = {x:e.clientX, y:e.clientY}; return; }
     if (gridMoveMode && userLoggedIn) { isDraggingGrid = true; lastMouse = {x:e.clientX, y:e.clientY}; return; }
+    
     if (userLoggedIn && markerMode !== "none") {
         if(markerMode === "erase") { for(let id in freeMarkers) if(Math.hypot(freeMarkers[id].x-wx, freeMarkers[id].y-wy) < 20/scale) remove(ref(db, `live_map/free_markers/${id}`)); }
         else { push(ref(db, 'live_map/free_markers'), { x:wx, y:wy, type:markerMode, createdAt: Date.now() }); }
@@ -172,6 +182,20 @@
     const c = getCoords(selectedGrid.gx, selectedGrid.gy); document.getElementById('coords-val').innerText = `${c.x}, ${c.y}`; draw();
   };
 
+  document.querySelectorAll('.m-selector').forEach(b => {
+      b.onclick = () => {
+          const type = b.dataset.type;
+          if (markerMode === type) {
+              markerMode = "none";
+              b.classList.remove('active');
+          } else {
+              document.querySelectorAll('.m-selector').forEach(x => x.classList.remove('active'));
+              b.classList.add('active');
+              markerMode = type;
+          }
+      };
+  });
+
   document.getElementById('syncCoordsBtn').onclick = () => { if(!userLoggedIn || selectedGrid.gx === null) return; bX = parseInt(document.getElementById('targetX').value) - (selectedGrid.gx * 100); bY = parseInt(document.getElementById('targetY').value) + (selectedGrid.gy * 100); update(ref(db, 'live_map'), { base_x: bX, base_y: bY }); showToast("Kalibroitu!"); draw(); };
   document.getElementById('gridMoveBtn').onclick = () => { gridMoveMode = !gridMoveMode; document.getElementById('gridMoveBtn').classList.toggle('active', gridMoveMode); draw(); };
   document.getElementById('confirmAreaBtn').onclick = () => { if(selectedGrid.gx === null) return; const key = `${selectedGrid.gx},${selectedGrid.gy}`; currentColor === "erase" ? remove(ref(db, `live_map/areas/${key}`)) : set(ref(db, `live_map/areas/${key}`), { color: currentColor }); showToast("Tallennettu!"); };
@@ -180,13 +204,14 @@
   
   const colors = ["rgba(0, 255, 0, 0.5)", "rgba(255, 0, 0, 0.5)", "rgba(0, 100, 255, 0.5)", "rgba(255, 255, 0, 0.5)", "rgba(160, 32, 240, 0.5)", "erase"];
   colors.forEach(c => { const s = document.createElement('div'); s.className = 'swatch'; s.style.background = (c==='erase'?'#444':c); s.onclick = () => { document.querySelectorAll('.swatch').forEach(w=>w.classList.remove('active')); s.classList.add('active'); currentColor = c; }; document.getElementById('colorPicker').appendChild(s); });
-  document.querySelectorAll('.m-selector').forEach(b => { b.onclick = () => { document.querySelectorAll('.m-selector').forEach(x=>x.classList.remove('active')); b.classList.add('active'); markerMode = b.dataset.type; }; });
-  document.getElementById('pushBtn').onclick = () => { update(ref(db, 'live_map'), { version: "v2.4.7" }); showToast("Push v2.4.7!"); };
+  
+  document.getElementById('pushBtn').onclick = () => { update(ref(db, 'live_map'), { version: CURRENT_VERSION }); showToast("Push " + CURRENT_VERSION + "!"); };
 
   onValue(dataRef, (s) => {
     const d = s.val() || {}; capturedAreas = d.areas || {}; freeMarkers = d.free_markers || {}; gridOffset = d.offset || {x:0, y:0};
     if(d.base_x !== undefined) bX = d.base_x; if(d.base_y !== undefined) bY = d.base_y;
     if(d.current_grid_size) { GRID_SIZE = d.current_grid_size; document.getElementById('gsSlider').value = GRID_SIZE; document.getElementById('gsVal').innerText = GRID_SIZE+"px"; }
+    if(d.version && d.version !== CURRENT_VERSION) document.getElementById('versionWarning').style.display = 'block'; else document.getElementById('versionWarning').style.display = 'none';
     document.getElementById('areaCount').innerText = Object.keys(capturedAreas).length;
     if(d.version) document.getElementById('verLabel').innerText = d.version; draw();
   });
