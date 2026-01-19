@@ -127,7 +127,11 @@
     for (let id in freeMarkers) {
         const m = freeMarkers[id]; let emoji = ""; let col = "";
         const hoursPassed = (Date.now() - m.createdAt) / 3600000;
-        if (m.type === "orange") { if (hoursPassed >= 14) { emoji = "✅"; col = "#2ecc71"; } else { emoji = "🔥,🍍"; col = "#e67e22"; } } else { emoji = "🌿"; col = "#27ae60"; }
+        if (m.type === "orange") { if (hoursPassed >= 14) { emoji = "✅"; col = "#2ecc71"; } else { emoji = "🔥"; col = "#e67e22"; } } else { emoji = "🌿"; col = "#27ae60"; }
+        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = "white"; ctx.lineWidth = 1/scale; ctx.stroke();
+        ctx.font = `${16/scale}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(emoji, m.x, m.y);
+        if (m.type === "yellow") { if (hoursPassed >= 5) { emoji = "✅"; col = "#2ecc71"; } else { emoji = "🍍"; col = "#e67e22"; } } else { emoji = "🌿"; col = "#27ae60"; }
         ctx.fillStyle = col; ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = "white"; ctx.lineWidth = 1/scale; ctx.stroke();
         ctx.font = `${16/scale}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(emoji, m.x, m.y);
@@ -223,5 +227,6 @@
 </script>
 </body>
 </html>
+
 
 
