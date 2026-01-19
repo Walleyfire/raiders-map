@@ -2,143 +2,64 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <title>RAIDERS – Alue Map v2.2.3</title>
-  <link rel="icon" type="image/png" href="Raiders.png">
+  <title>RAIDERS - Alue Map</title>
   <style>
-    body { margin: 0; background:#0a0a0a; color:#eee; font-family: sans-serif; overflow: hidden; }
-    
-    /* PÄIVITYSILMOITUS */
-    #update-notice {
-      position: fixed; top: 60px; left: 0; right: 0;
-      background: #ff0000; color: white; text-align: center;
-      padding: 10px; z-index: 2000; font-weight: bold;
-      display: none; border-bottom: 2px solid white;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    }
-
-    #info { 
-      padding: 0 20px; height: 60px; background: rgba(10, 0, 0, 0.9); 
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100; 
-      border-bottom: 2px solid #400000; display: flex; align-items: center; 
-      gap: 12px; backdrop-filter: blur(10px);
-    }
-
-    .logo-container { display: flex; align-items: baseline; gap: 8px; border-right: 2px solid #400000; padding-right: 15px; flex-shrink: 0; }
-    .logo { color: #ff0000; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; font-style: italic; }
-    .version-tag { color: #666; font-size: 11px; font-family: monospace; }
-
-    #legendBox {
-      position: fixed; bottom: 20px; left: 20px; background: rgba(10, 0, 0, 0.85); 
-      border: 1px solid #400000; padding: 12px; border-radius: 8px; z-index: 90;
-      backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 8px; pointer-events: none;
-    }
-    .legend-title { color: #ff0000; font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #300000; padding-bottom: 4px; }
-    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: bold; }
-
-    canvas { display: block; cursor: crosshair; image-rendering: pixelated; }
-    .admin-only { display: none !important; } 
-    .is-admin .admin-only { display: flex !important; align-items: center; gap: 10px; }
-
-    .cal-group { border-right: 1px solid #400000; padding-right: 15px; display: flex; align-items: center; }
-    input { background: #000; color: #00ff00; border: 1px solid #300000; width: 55px; padding: 4px; font-family: monospace; text-align: center; font-size: 12px; }
-    button { background: #220000; color: white; border: 1px solid #500000; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 13px; }
-    button:hover { background: #400000; border-color: #ff0000; }
-    
-    #confirmAreaBtn { background: #1b5e20; border: 1px solid #2ecc71; }
-    #gridMoveBtn.active, #markerToggle.active { background: #e67e22; color: #fff; border-color: white; }
-
-    #markerTools { gap: 8px; background: #1a0000; padding: 5px; border-radius: 4px; border: 1px solid #444; display: none; align-items: center; }
-    .m-tool { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 3px; background: #333; border: 1px solid #444; }
-    .m-tool.active { border-color: white; box-shadow: 0 0 8px #fff; }
-
-    .color-picker { display: flex; gap: 6px; padding: 0 10px; border-left: 1px solid #400000; }
-    .swatch { width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1px solid #222; transition: transform 0.1s; }
-    .swatch:hover { transform: scale(1.1); }
-    .swatch.active { border-color: white; box-shadow: 0 0 5px white; transform: scale(1.1); }
-
-    .right-section { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-    #coords-display { color: #00ff00; font-size: 14px; background: #1a0000; border: 1px solid #400000; border-radius: 4px; padding: 4px 12px; min-width: 140px; text-align: center; }
-    .point-box { color: #fff; background: #1a0000; border: 1px solid #400000; border-radius: 4px; padding: 4px 12px; min-width: 90px; text-align: center; }
-    .label-small { color: #a0a0a0; font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; display: block; }
-
-    #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-    .login-card { background: #0A0000; padding: 30px; border: 2px solid #400000; border-radius: 8px; width: 300px; display: flex; flex-direction: column; gap: 15px; }
-    #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #400000; color: #fff; padding: 12px 30px; border-radius: 50px; z-index: 10000; display: none; border: 1px solid #f00; font-weight: bold; }
+    body { margin: 0; background:#0a0a0a; color:#eee; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+    #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 5000; display: none; }
+    .login-card { background: #0d0000; border: 2px solid #600000; padding: 40px; border-radius: 12px; width: 320px; text-align: center; box-shadow: 0 0 40px rgba(255, 0, 0, 0.3); }
+    .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #400000; background: #000; color: #0f0; outline: none; box-sizing: border-box; }
+    .login-card button { width: 100%; padding: 12px; background: #600000; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    #header { position: fixed; top: 0; left: 0; right: 0; height: 65px; background: #000; border-bottom: 2px solid #400000; display: flex; align-items: center; padding: 0 20px; z-index: 1000; justify-content: space-between; }
+    .logo { color: #ff0000; font-size: 26px; font-weight: 900; letter-spacing: 2px; }
+    #adminSidePanel { position: fixed; top: 85px; right: 20px; width: 230px; background: rgba(10, 0, 0, 0.95); border: 1px solid #500000; padding: 15px; border-radius: 8px; z-index: 1000; display: none; flex-direction: column; gap: 12px; }
+    .is-admin #adminSidePanel { display: flex; }
+    .panel-section { border-bottom: 1px solid #300000; padding-bottom: 10px; }
+    .section-title { color: #e67e22; font-size: 10px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+    .tool-btn { background: #220000; color: white; border: 1px solid #500000; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 11px; font-weight: bold; width: 100%; margin-bottom: 4px; }
+    .tool-btn.active { background: #e67e22; color: #000; border-color: #fff; }
+    .coord-input { width: 48%; padding: 5px; background: #000; border: 1px solid #555; color: #0f0; font-family: monospace; font-size: 12px; margin-bottom: 5px; }
+    .swatch { width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 1px solid #000; }
+    .swatch.active { border: 2px solid white; box-shadow: 0 0 10px white; }
+    #bottomLeftUI { position: fixed; bottom: 20px; left: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+    .glass-box { background: rgba(0,0,0,0.85); border: 1px solid #400000; padding: 12px; border-radius: 8px; font-size: 12px; min-width: 160px; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+    .legend-title { color: #ff0000; font-weight: bold; border-bottom: 1px solid #333; margin-bottom: 5px; padding-bottom: 3px; display: block; }
+    #toast { position: fixed; top: 85px; left: 50%; transform: translateX(-50%); background: #ff0000; color: #fff; padding: 10px 30px; border-radius: 50px; z-index: 10000; display: none; font-weight: bold; }
+    canvas { display: block; cursor: crosshair; }
   </style>
 </head>
 <body id="mainBody">
-
-<div id="update-notice">⚠️ UUSI PÄIVITYS SAATAVILLA! Paina CTRL + F5 tyhjentääksesi välimuistin.</div>
-
-<div id="legendBox">
-    <div class="legend-title">RAIDERS INFO</div>
-    <div class="legend-item">🌿 <span style="color: #00ff00;">Istutuspaikka</span></div>
-    <div class="legend-item">🔥 <span style="color: #ff8c00;">Kasvi kasvaa</span></div>
-</div>
-
-<div id="loginOverlay">
-    <div class="login-card">
-        <h2 style="color:red; text-align:center; margin-top:0;">ADMIN LOGIN</h2>
-        <div><span class="label-small">Sähköposti</span><input type="email" id="loginEmail" value="@raid.com" style="width:100%; box-sizing:border-box; background:#000; color:#fff; border:1px solid #400000; padding:8px;"></div>
-        <div><span class="label-small">Salasana</span><input type="password" id="loginPass" placeholder="••••••••" style="width:100%; box-sizing:border-box; background:#000; color:#fff; border:1px solid #400000; padding:8px;"></div>
-        <div style="display:flex; gap: 10px; margin-top:10px;">
-            <button id="doLogin" style="flex: 2; background: #400000;">Kirjaudu</button>
-            <button id="closeLogin" style="flex: 1;">Sulje</button>
-        </div>
-    </div>
-</div>
-
 <div id="toast"></div>
 
-<div id="info">
-  <div class="logo-container">
-    <div class="logo">RAIDERS</div>
-    <div class="version-tag">v2.2.3</div>
-  </div>
-
-  <div class="admin-only cal-group">
-      <div style="display:flex; gap: 8px; align-items: center;">
-          <div style="display:flex; flex-direction:column; align-items:center;"><span class="label-small">Base X</span><input type="number" id="baseXInput" value="1700"></div>
-          <div style="display:flex; flex-direction:column; align-items:center;"><span class="label-small">Base Y</span><input type="number" id="baseYInput" value="3700"></div>
-          <button id="calBtn" style="margin-top:12px;">🔧 Kalibroi</button>
-      </div>
-  </div>
-  
-  <button id="confirmAreaBtn" class="admin-only">✅ Vahvista</button>
-  <button id="gridMoveBtn" class="admin-only">▦ Kohdista</button>
-  
-  <div class="admin-only" style="padding: 0 15px; border-right: 1px solid #400000; display: flex; flex-direction: column; align-items: center;">
-    <span class="label-small">Ruudun koko</span>
-    <div style="display:flex; align-items:center; gap:8px;">
-        <input type="range" id="gridSizeSlider" min="5" max="150" value="25" style="width:70px; accent-color:red;">
-        <span id="gridSizeVal" style="color:#0f0; font-size:11px; font-family:monospace; min-width: 30px;">25px</span>
+<div id="bottomLeftUI">
+    <div class="glass-box">
+        <span class="legend-title">INFO</span>
+        🌿 = Kasvatus alue (Pysyvä)<br>
+        🔥 = Kasvaa (14h laskuri)<br>
+        ✅ = Valmis kerättäväksi<br>
+        <hr style="border:0; border-top:1px solid #333; margin:5px 0;">
+        <span style="color:#0f0; font-size:10px;">Vie hiiri päälle nähdäksesi kellonajat ja jäljellä olevan ajan.</span>
     </div>
-  </div>
+    <div class="glass-box" style="text-align:center; border-color: #0f0;">
+        <span id="areaCount" style="color:#0f0; font-size:16px; font-weight:bold;">0</span><br>
+        <span style="font-size:10px; letter-spacing:1px;">ALUETTA HALLUSSA</span>
+    </div>
+</div>
 
-  <button id="markerToggle" class="admin-only">📍 Marker</button>
-  <div id="markerTools">
-      <div class="m-tool active" id="mGreen">🌿</div>
-      <div class="m-tool" id="mOrange">🔥</div>
-      <div class="m-tool" id="mEraser">❌</div>
-  </div>
-  
-  <div id="adminTools" class="admin-only color-picker">
-    <div class="swatch active" style="background: rgba(0, 255, 0, 0.5);" data-color="rgba(0, 255, 0, 0.5)"></div>
-    <div class="swatch" style="background: rgba(255, 0, 0, 0.5);" data-color="rgba(255, 0, 0, 0.5)"></div>
-    <div class="swatch" style="background: rgba(0, 150, 255, 0.5);" data-color="rgba(0, 150, 255, 0.5)"></div>
-    <div class="swatch" style="background: rgba(255, 255, 0, 0.5);" data-color="rgba(255, 255, 0, 0.5)"></div>
-    <div class="swatch" style="background: rgba(155, 0, 255, 0.5);" data-color="rgba(155, 0, 255, 0.5)"></div>
-    <div class="swatch" style="background: rgba(255, 140, 0, 0.5);" data-color="rgba(255, 140, 0, 0.5)"></div>
-    <div class="swatch" style="background: #444; display:flex; align-items:center; justify-content:center; font-size:10px;" data-color="erase">❌</div>
-  </div>
+<div id="loginOverlay"><div class="login-card"><h2>ADMIN LOGIN</h2><input type="email" id="loginEmail" placeholder="Sähköposti" value="admin@raid.com"><input type="password" id="loginPass" placeholder="Salasana"><button id="doLogin">KIRJAUDU</button></div></div>
+<div id="header"><div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.0</span></div><div style="display:flex; gap:10px; align-items:center;"><div id="coords-val" style="font-family:monospace; color:#0f0; background:#111; padding:8px; border:1px solid #333; border-radius:4px; min-width:120px; text-align:center;">0, 0</div><button id="authBtn" style="background:#400000; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer;">Admin</button></div></div>
 
-  <button id="pushVersionBtn" class="admin-only" style="background:#400; font-size:10px;">Push v2.2.3</button>
-
-  <div class="right-section">
-      <div id="coords-display"><span class="label-small">Sijainti</span><span id="coords-val">---- , ----</span></div>
-      <div class="point-box"><span class="label-small">Hallinta</span><span id="areaPoints">0 aluetta</span></div>
-      <button id="authBtn">Admin</button>
+<div id="adminSidePanel">
+  <div class="panel-section"><div class="section-title">Valtaus</div><button id="confirmAreaBtn" class="tool-btn" style="background:#1b5e20;">TALLENNA RUUTU</button><div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;" id="colorPicker"></div></div>
+  <div class="panel-section">
+    <div class="section-title">Ruudukko & Kalibrointi</div>
+    <div style="display:flex; justify-content: space-between;"><input type="number" id="targetX" class="coord-input" value="1700"><input type="number" id="targetY" class="coord-input" value="3700"></div>
+    <button id="syncCoordsBtn" class="tool-btn" style="background:#e67e22; color:#000;">⚙️ ASETA RUUTUUN</button>
+    <button id="gridMoveBtn" class="tool-btn">▦ SIIRTO</button>
+    <input type="range" id="gsSlider" min="10" max="100" value="25" style="width:100%; margin-top:10px;">
+    <div style="text-align:center; font-size:10px; color:#888;">RUUDUN KOKO: <span id="gsVal">25px</span></div>
   </div>
+  <div class="panel-section"><div class="section-title">Markkerit</div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;"><button class="m-selector tool-btn" data-type="green">🌿 Kasvi alue</button><button class="m-selector tool-btn" data-type="orange">🔥 KASVAA</button></div><button class="m-selector tool-btn" data-type="erase">❌ POISTA</button></div>
+  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.0</button>
 </div>
 
 <canvas id="map"></canvas>
@@ -148,177 +69,127 @@
   import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  // VERSIONHALLINTA
-  const CURRENT_VERSION = "v2.2.3";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDNRDRwOQEnNDVeFIZe4no7wvOdHnpyfvY",
-    authDomain: "hellcity-jengi-map.firebaseapp.com",
-    projectId: "hellcity-jengi-map",
-    databaseURL: "https://hellcity-jengi-map-default-rtdb.europe-west1.firebasedatabase.app"
-  };
-
+  const firebaseConfig = { apiKey: "AIzaSyDNRDRwOQEnNDVeFIZe4no7wvOdHnpyfvY", authDomain: "hellcity-jengi-map.firebaseapp.com", projectId: "hellcity-jengi-map", databaseURL: "https://hellcity-jengi-map-default-rtdb.europe-west1.firebasedatabase.app" };
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const auth = getAuth(app);
   const dataRef = ref(db, 'live_map');
-
   const canvas = document.getElementById('map');
   const ctx = canvas.getContext('2d');
 
-  let userLoggedIn = false, gridMoveMode = false, markerMode = false, markerEraser = false;
-  let activeMarkerColor = "#006400", isDragging = false, isDraggingGrid = false;
-  let capturedAreas = {}, freeMarkers = {}, gridOffset = { x: 0, y: 0 }, calAnchor = { gx: 0, gy: 0 };
-  let loadedTiles = 0, scale = 0.15, offsetX = 0, offsetY = 0, lastMouse = { x: 0, y: 0 };
-  let selectedGrid = { gx: null, gy: null }, currentColor = "rgba(0, 255, 0, 0.5)", GRID_SIZE = 25; 
+  let userLoggedIn = false, gridMoveMode = false, markerMode = "none", capturedAreas = {}, freeMarkers = {}, gridOffset = {x:0, y:0}, scale = 0.15, offsetX = 0, offsetY = 0, lastMouse = {x:0, y:0}, isDragging = false, isDraggingGrid = false, selectedGrid = {gx:null, gy:null}, currentColor = "rgba(0, 255, 0, 0.5)", GRID_SIZE = 25, bX = 1700, bY = 3700, hoverMarker = null;
 
-  const tiles = [];
-  for (let y = 0; y < 8; y++) {
-    for (let x = 0; x < 8; x++) {
-      const img = new Image();
-      img.src = `gta_karttapalat/tile_${x}_${y}.png`;
-      img.onload = () => { 
-        loadedTiles++; 
-        if(loadedTiles === 64) { centerMap(); draw(); } 
-      };
-      tiles.push({ img, x, y });
-    }
-  }
+  onAuthStateChanged(auth, u => { userLoggedIn = !!u; document.getElementById('mainBody').classList.toggle('is-admin', userLoggedIn); document.getElementById('authBtn').innerText = userLoggedIn ? "Ulos" : "Admin"; });
+  document.getElementById('doLogin').onclick = () => { signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).then(() => document.getElementById('loginOverlay').style.display='none').catch(() => alert("Virhe!")); };
+  document.getElementById('authBtn').onclick = () => userLoggedIn ? signOut(auth) : document.getElementById('loginOverlay').style.display='flex';
 
-  function centerMap() {
-    scale = 0.15;
-    offsetX = (window.innerWidth / 2) - (4096 * scale);
-    offsetY = (window.innerHeight / 2) - (4096 * scale);
-  }
-
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg; toast.style.display = 'block'; setTimeout(() => { toast.style.display = 'none'; }, 3000);
-  }
-
-  onAuthStateChanged(auth, u => { 
-    userLoggedIn = !!u; 
-    document.getElementById('mainBody').classList.toggle('is-admin', userLoggedIn); 
-    document.getElementById('authBtn').innerText = u ? "Ulos" : "Admin";
-  });
-
-  // VERSIONTARKISTUS FIREBASESTA
-  onValue(ref(db, 'live_map/version'), (snap) => {
-    const latest = snap.val();
-    if (latest && latest !== CURRENT_VERSION) {
-      document.getElementById('update-notice').style.display = 'block';
-    } else {
-      document.getElementById('update-notice').style.display = 'none';
-    }
-  });
-
-  // PUSH TOIMINTO
-  document.getElementById('pushVersionBtn').onclick = () => {
-    if(confirm("Päivitetäänkö versio " + CURRENT_VERSION + " kaikille?")) {
-      set(ref(db, 'live_map/version'), CURRENT_VERSION).then(() => showToast("Versio " + CURRENT_VERSION + " työnnetty!"));
-    }
-  };
-
-  document.getElementById('authBtn').onclick = () => { 
-    if (userLoggedIn) { 
-        if (confirm("Kirjaudu ulos?")) signOut(auth).then(() => { showToast("Uloskirjaus."); gridMoveMode = false; markerMode = false; draw(); });
-    } else { document.getElementById('loginOverlay').style.display = 'flex'; }
-  };
-
-  document.getElementById('doLogin').onclick = () => { 
-    signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value)
-      .then(() => { document.getElementById('loginOverlay').style.display = 'none'; showToast("Tervetuloa!"); })
-      .catch(() => alert("Kirjautumisvirhe."));
-  };
-  document.getElementById('closeLogin').onclick = () => document.getElementById('loginOverlay').style.display = 'none';
-
-  function updateMarkerUI(id) {
-    document.querySelectorAll('.m-tool').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-  document.getElementById('mGreen').onclick = () => { markerEraser = false; activeMarkerColor = "#006400"; updateMarkerUI('mGreen'); };
-  document.getElementById('mOrange').onclick = () => { markerEraser = false; activeMarkerColor = "#FF8C00"; updateMarkerUI('mOrange'); };
-  document.getElementById('mEraser').onclick = () => { markerEraser = true; updateMarkerUI('mEraser'); };
-
-  document.getElementById('markerToggle').onclick = () => {
-    markerMode = !markerMode; gridMoveMode = false;
-    document.getElementById('markerToggle').classList.toggle('active', markerMode);
-    document.getElementById('gridMoveBtn').classList.remove('active');
-    document.getElementById('markerTools').style.display = markerMode ? 'flex' : 'none';
-    draw();
-  };
-
-  const gridSizeSlider = document.getElementById('gridSizeSlider');
-  const gridSizeVal = document.getElementById('gridSizeVal');
-  gridSizeSlider.oninput = () => { GRID_SIZE = parseInt(gridSizeSlider.value); gridSizeVal.innerText = GRID_SIZE + "px"; draw(); };
-  gridSizeSlider.onchange = () => { if(userLoggedIn) update(ref(db, 'live_map'), { current_grid_size: GRID_SIZE }); };
+  const tiles = []; let loadedTiles = 0;
+  for (let y = 0; y < 8; y++) { for (let x = 0; x < 8; x++) { const img = new Image(); img.src = `gta_karttapalat/tile_${x}_${y}.png`; img.onload = () => { if(++loadedTiles === 64) { centerMap(); draw(); } }; tiles.push({ img, x, y }); } }
+  function centerMap() { offsetX = (window.innerWidth/2)-(4096*scale); offsetY = (window.innerHeight/2)-(4096*scale); }
+  function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(()=>t.style.display='none',3000); }
+  function getCoords(gx, gy) { return { x: Math.round(bX + (gx * 100)), y: Math.round(bY - (gy * 100)) }; }
 
   function draw() {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save(); ctx.translate(offsetX, offsetY); ctx.scale(scale, scale);
     ctx.imageSmoothingEnabled = false;
-    tiles.forEach(t => ctx.drawImage(t.img, t.x * 1024, t.y * 1024, 1024.5, 1024.5));
-    const GAP = 0.5, DRAW_SIZE = GRID_SIZE - (GAP * 2);
+    tiles.forEach(t => ctx.drawImage(t.img, t.x * 1024, t.y * 1024, 1025, 1025));
+    
     if (gridMoveMode) {
-        ctx.beginPath(); ctx.strokeStyle = "rgba(255, 165, 0, 0.6)"; ctx.lineWidth = 1.5/scale;
-        for (let x = 0; x <= 8192; x += GRID_SIZE) { ctx.moveTo(x + gridOffset.x, gridOffset.y); ctx.lineTo(x + gridOffset.x, 8192 + gridOffset.y); }
-        for (let y = 0; y <= 8192; y += GRID_SIZE) { ctx.moveTo(gridOffset.x, y + gridOffset.y); ctx.lineTo(8192 + gridOffset.x, y + gridOffset.y); }
+        ctx.beginPath(); ctx.strokeStyle = "rgba(255, 165, 0, 0.4)"; ctx.lineWidth = 1/scale;
+        for (let x = -2000; x <= 10000; x += GRID_SIZE) { ctx.moveTo(x + gridOffset.x, -2000); ctx.lineTo(x + gridOffset.x, 10000); }
+        for (let y = -2000; y <= 10000; y += GRID_SIZE) { ctx.moveTo(-2000, y + gridOffset.y); ctx.lineTo(10000, y + gridOffset.y); }
         ctx.stroke();
     }
-    for (let key in capturedAreas) { 
-        let [gx, gy] = key.split(',').map(Number); ctx.fillStyle = capturedAreas[key].color; 
-        ctx.fillRect(gx * GRID_SIZE + gridOffset.x + GAP, gy * GRID_SIZE + gridOffset.y + GAP, DRAW_SIZE, DRAW_SIZE); 
+
+    for (let key in capturedAreas) { let [gx, gy] = key.split(',').map(Number); ctx.fillStyle = capturedAreas[key].color; ctx.fillRect(gx*GRID_SIZE + gridOffset.x, gy*GRID_SIZE + gridOffset.y, GRID_SIZE, GRID_SIZE); }
+    for (let id in freeMarkers) {
+        const m = freeMarkers[id]; let emoji = ""; let col = "";
+        const hoursPassed = (Date.now() - m.createdAt) / 3600000;
+        if (m.type === "orange") { if (hoursPassed >= 14) { emoji = "✅"; col = "#2ecc71"; } else { emoji = "🔥"; col = "#e67e22"; } } else { emoji = "🌿"; col = "#27ae60"; }
+        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = "white"; ctx.lineWidth = 1/scale; ctx.stroke();
+        ctx.font = `${16/scale}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(emoji, m.x, m.y);
     }
-    for (let id in freeMarkers) { 
-        ctx.fillStyle = freeMarkers[id].color || "#006400"; ctx.beginPath(); ctx.arc(freeMarkers[id].x, freeMarkers[id].y, 6/scale, 0, Math.PI*2); ctx.fill(); 
-        ctx.strokeStyle = "white"; ctx.lineWidth = 1/scale; ctx.stroke(); 
-    }
-    if (selectedGrid.gx !== null && !gridMoveMode && !markerMode) { 
-        ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 3/scale; ctx.strokeRect(selectedGrid.gx * GRID_SIZE + gridOffset.x, selectedGrid.gy * GRID_SIZE + gridOffset.y, GRID_SIZE, GRID_SIZE); 
-    }
+    if (selectedGrid.gx !== null) { ctx.strokeStyle = "white"; ctx.lineWidth = 3/scale; ctx.strokeRect(selectedGrid.gx*GRID_SIZE + gridOffset.x, selectedGrid.gy*GRID_SIZE + gridOffset.y, GRID_SIZE, GRID_SIZE); }
     ctx.restore();
+
+    if (hoverMarker) {
+        const now = Date.now();
+        const created = hoverMarker.createdAt;
+        const diffMs = (created + (14 * 3600000)) - now;
+        const date = new Date(created);
+        const timeStr = `Luotu: ${date.toLocaleDateString('fi-FI')} klo ${date.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}`;
+        
+        ctx.font = "bold 13px Segoe UI";
+        let lines = [];
+        if (hoverMarker.type === "orange" && diffMs > 0) {
+            const h = Math.floor(diffMs / 3600000);
+            const m = Math.floor((diffMs % 3600000) / 60000);
+            lines.push(`Valmis: ${h}h ${m}m`);
+        }
+        lines.push(timeStr);
+
+        const padding = 10; const lineHeight = 18;
+        let maxWidth = 0; lines.forEach(l => { maxWidth = Math.max(maxWidth, ctx.measureText(l).width); });
+
+        ctx.fillStyle = "rgba(0,0,0,0.95)"; ctx.strokeStyle = "#ff0000"; ctx.lineWidth = 2;
+        const boxW = maxWidth + (padding * 2); const boxH = (lines.length * lineHeight) + padding;
+        ctx.fillRect(lastMouse.x + 15, lastMouse.y - 15, boxW, boxH);
+        ctx.strokeRect(lastMouse.x + 15, lastMouse.y - 15, boxW, boxH);
+
+        ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.textBaseline = "top";
+        lines.forEach((line, i) => {
+            if(i === 0 && lines.length > 1) ctx.fillStyle = "#e67e22";
+            else ctx.fillStyle = "#fff";
+            ctx.fillText(line, lastMouse.x + 15 + padding, lastMouse.y - 15 + padding/2 + (i * lineHeight));
+        });
+    }
   }
 
-  canvas.addEventListener('mousedown', (e) => {
-    const worldX = (e.clientX - offsetX) / scale, worldY = (e.clientY - offsetY) / scale;
-    if (gridMoveMode && e.button === 0) { isDraggingGrid = true; lastMouse = { x: e.clientX, y: e.clientY }; return; }
-    if (e.button === 2) { isDragging = true; lastMouse = { x: e.clientX, y: e.clientY }; return; }
-    if (userLoggedIn && markerMode) {
-        if (markerEraser) { 
-            for (let id in freeMarkers) { if (Math.hypot(freeMarkers[id].x - worldX, freeMarkers[id].y - worldY) < 20/scale) { remove(ref(db, `live_map/free_markers/${id}`)); break; } } 
-        } else { push(ref(db, 'live_map/free_markers'), { x: worldX, y: worldY, color: activeMarkerColor }); }
+  document.getElementById('gsSlider').oninput = (e) => { GRID_SIZE = parseInt(e.target.value); document.getElementById('gsVal').innerText = GRID_SIZE+"px"; draw(); };
+  document.getElementById('gsSlider').onchange = () => { if(userLoggedIn) update(ref(db, 'live_map'), { current_grid_size: GRID_SIZE }); };
+
+  window.onmousemove = (e) => {
+    const wx = (e.clientX - offsetX)/scale, wy = (e.clientY - offsetY)/scale;
+    hoverMarker = null;
+    for (let id in freeMarkers) { if (Math.hypot(freeMarkers[id].x - wx, freeMarkers[id].y - wy) < 15/scale) { hoverMarker = freeMarkers[id]; break; } }
+    if (isDraggingGrid) { gridOffset.x += (e.clientX - lastMouse.x)/scale; gridOffset.y += (e.clientY - lastMouse.y)/scale; }
+    else if (isDragging) { offsetX += e.clientX - lastMouse.x; offsetY += e.clientY - lastMouse.y; }
+    lastMouse = {x:e.clientX, y:e.clientY}; draw();
+  };
+
+  canvas.onmousedown = (e) => {
+    const wx = (e.clientX - offsetX)/scale, wy = (e.clientY - offsetY)/scale;
+    if (e.button === 2) { isDragging = true; lastMouse = {x:e.clientX, y:e.clientY}; return; }
+    if (gridMoveMode && userLoggedIn) { isDraggingGrid = true; lastMouse = {x:e.clientX, y:e.clientY}; return; }
+    if (userLoggedIn && markerMode !== "none") {
+        if(markerMode === "erase") { for(let id in freeMarkers) if(Math.hypot(freeMarkers[id].x-wx, freeMarkers[id].y-wy) < 20/scale) remove(ref(db, `live_map/free_markers/${id}`)); }
+        else { push(ref(db, 'live_map/free_markers'), { x:wx, y:wy, type:markerMode, createdAt: Date.now() }); }
         return;
     }
-    const gx = Math.floor((worldX - gridOffset.x) / GRID_SIZE), gy = Math.floor((worldY - gridOffset.y) / GRID_SIZE);
-    selectedGrid = { gx, gy }; 
-    const bX = parseInt(document.getElementById('baseXInput').value) || 1700, bY = parseInt(document.getElementById('baseYInput').value) || 3700;
-    document.getElementById('coords-val').innerText = `${Math.round(bX + (gx - calAnchor.gx) * 100)} , ${Math.round(bY + (calAnchor.gy - gy) * 100)}`;
-    draw();
-  });
-
-  window.onmousemove = (e) => { 
-    if (isDraggingGrid) { gridOffset.x += (e.clientX - lastMouse.x) / scale; gridOffset.y += (e.clientY - lastMouse.y) / scale; lastMouse = { x: e.clientX, y: e.clientY }; draw(); }
-    if (isDragging) { offsetX += e.clientX - lastMouse.x; offsetY += e.clientY - lastMouse.y; lastMouse = { x: e.clientX, y: e.clientY }; draw(); } 
+    selectedGrid = { gx: Math.floor((wx-gridOffset.x)/GRID_SIZE), gy: Math.floor((wy-gridOffset.y)/GRID_SIZE) };
+    const c = getCoords(selectedGrid.gx, selectedGrid.gy); document.getElementById('coords-val').innerText = `${c.x}, ${c.y}`; draw();
   };
-  window.onmouseup = () => { if (isDraggingGrid && userLoggedIn) update(ref(db, 'live_map'), { offset: gridOffset }); isDraggingGrid = isDragging = false; };
-  canvas.onwheel = (e) => { e.preventDefault(); const z = e.deltaY < 0 ? 1.15 : 0.85; const wx = (e.clientX - offsetX) / scale, wy = (e.clientY - offsetY) / scale; scale *= z; scale = Math.min(Math.max(0.05, scale), 25); offsetX = e.clientX - wx * scale; offsetY = e.clientY - wy * scale; draw(); };
 
-  onValue(dataRef, (snapshot) => {
-    const d = snapshot.val() || {};
-    capturedAreas = d.areas || {}; freeMarkers = d.free_markers || {}; gridOffset = d.offset || {x:0,y:0}; calAnchor = d.anchor || {gx:0,gy:0};
-    if(d.current_grid_size) { GRID_SIZE = d.current_grid_size; gridSizeSlider.value = GRID_SIZE; gridSizeVal.innerText = GRID_SIZE + "px"; }
-    if(d.baseX!==undefined) document.getElementById('baseXInput').value = d.baseX;
-    if(d.baseY!==undefined) document.getElementById('baseYInput').value = d.baseY;
-    document.getElementById('areaPoints').innerText = `${Object.keys(capturedAreas).length} aluetta`;
-    draw();
-  });
-
-  document.getElementById('gridMoveBtn').onclick = () => { gridMoveMode = !gridMoveMode; markerMode = false; document.getElementById('markerTools').style.display = 'none'; document.getElementById('gridMoveBtn').classList.toggle('active', gridMoveMode); draw(); };
-  document.getElementById('confirmAreaBtn').onclick = () => { if (selectedGrid.gx !== null && userLoggedIn) { const key = `${selectedGrid.gx},${selectedGrid.gy}`; if (currentColor === "erase") remove(ref(db, `live_map/areas/${key}`)); else set(ref(db, `live_map/areas/${key}`), { color: currentColor }); } };
-  document.getElementById('calBtn').onclick = () => { if (userLoggedIn && selectedGrid.gx !== null) update(ref(db, 'live_map'), { anchor: { gx: selectedGrid.gx, gy: selectedGrid.gy }, baseX: parseInt(document.getElementById('baseXInput').value), baseY: parseInt(document.getElementById('baseYInput').value) }).then(() => showToast("Kalibroitu!")); };
-  document.querySelectorAll('.swatch').forEach(s => s.onclick = () => { document.querySelectorAll('.swatch').forEach(w => w.classList.remove('active')); s.classList.add('active'); currentColor = s.dataset.color; });
+  document.getElementById('syncCoordsBtn').onclick = () => { if(!userLoggedIn || selectedGrid.gx === null) return; bX = parseInt(document.getElementById('targetX').value) - (selectedGrid.gx * 100); bY = parseInt(document.getElementById('targetY').value) + (selectedGrid.gy * 100); update(ref(db, 'live_map'), { base_x: bX, base_y: bY }); showToast("Kalibroitu!"); draw(); };
+  document.getElementById('gridMoveBtn').onclick = () => { gridMoveMode = !gridMoveMode; document.getElementById('gridMoveBtn').classList.toggle('active', gridMoveMode); draw(); };
+  document.getElementById('confirmAreaBtn').onclick = () => { if(selectedGrid.gx === null) return; const key = `${selectedGrid.gx},${selectedGrid.gy}`; currentColor === "erase" ? remove(ref(db, `live_map/areas/${key}`)) : set(ref(db, `live_map/areas/${key}`), { color: currentColor }); showToast("Tallennettu!"); };
+  window.onwheel = (e) => { const f = Math.pow(1.1, e.deltaY > 0 ? -1 : 1); const wx = (e.clientX - offsetX) / scale; const wy = (e.clientY - offsetY) / scale; scale = Math.min(Math.max(scale * f, 0.04), 5); offsetX = e.clientX - wx * scale; offsetY = e.clientY - wy * scale; draw(); };
+  window.onmouseup = () => { if(isDraggingGrid) update(ref(db, 'live_map'), { offset: gridOffset }); isDragging = isDraggingGrid = false; };
   
+  const colors = ["rgba(0, 255, 0, 0.5)", "rgba(255, 0, 0, 0.5)", "rgba(0, 100, 255, 0.5)", "rgba(255, 255, 0, 0.5)", "rgba(160, 32, 240, 0.5)", "erase"];
+  colors.forEach(c => { const s = document.createElement('div'); s.className = 'swatch'; s.style.background = (c==='erase'?'#444':c); s.onclick = () => { document.querySelectorAll('.swatch').forEach(w=>w.classList.remove('active')); s.classList.add('active'); currentColor = c; }; document.getElementById('colorPicker').appendChild(s); });
+  document.querySelectorAll('.m-selector').forEach(b => { b.onclick = () => { document.querySelectorAll('.m-selector').forEach(x=>x.classList.remove('active')); b.classList.add('active'); markerMode = b.dataset.type; }; });
+  document.getElementById('pushBtn').onclick = () => { update(ref(db, 'live_map'), { version: "v2.4.7" }); showToast("Push v2.4.7!"); };
+
+  onValue(dataRef, (s) => {
+    const d = s.val() || {}; capturedAreas = d.areas || {}; freeMarkers = d.free_markers || {}; gridOffset = d.offset || {x:0, y:0};
+    if(d.base_x !== undefined) bX = d.base_x; if(d.base_y !== undefined) bY = d.base_y;
+    if(d.current_grid_size) { GRID_SIZE = d.current_grid_size; document.getElementById('gsSlider').value = GRID_SIZE; document.getElementById('gsVal').innerText = GRID_SIZE+"px"; }
+    document.getElementById('areaCount').innerText = Object.keys(capturedAreas).length;
+    if(d.version) document.getElementById('verLabel').innerText = d.version; draw();
+  });
   window.onresize = () => draw();
   canvas.oncontextmenu = (e) => e.preventDefault();
 </script>
