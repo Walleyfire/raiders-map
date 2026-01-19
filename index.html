@@ -39,8 +39,8 @@
         <span class="legend-title">INFO</span>
         🌿 = Kasvi paikka (Pysyvä)<br>
         🔥 = Kasvaa (14h laskuri)<br>
+        🍍 = Ananas kasvaa (5h laskuri)<br>
         ✅ = Valmis kerättäväksi<br>
-        🍍 = Ananas kasvaa <br>
         <hr style="border:0; border-top:1px solid #333; margin:5px 0;">
         <span style="color:#0f0; font-size:10px;">Vie hiiri päälle nähdäksesi kellonajat.</span>
     </div>
@@ -52,7 +52,7 @@
 
 <div id="loginOverlay"><div class="login-card"><h2>ADMIN LOGIN</h2><input type="email" id="loginEmail" placeholder="Sähköposti" value="admin@raid.com"><input type="password" id="loginPass" placeholder="Salasana"><button id="doLogin">KIRJAUDU</button></div></div>
 <div id="header">
-    <div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.2</span></div>
+    <div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.3</span></div>
     <div style="display:flex; gap:10px; align-items:center;">
         <div id="coords-val" style="font-family:monospace; color:#0f0; background:#111; padding:8px; border:1px solid #333; border-radius:4px; min-width:120px; text-align:center;">0, 0</div>
         <button id="authBtn" style="background:#400000; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer;">Admin</button>
@@ -74,11 +74,11 @@
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
           <button class="m-selector tool-btn" data-type="green">🌿 Kasvi paikka</button>
           <button class="m-selector tool-btn" data-type="orange">🔥 Kasvaa</button>
-          <button class="m-selector tool-btn" data-type="yellow">🍍 Kasvaa</button>
+          <button class="m-selector tool-btn" data-type="yellow">🍍 Ananas</button>
       </div>
       <button class="m-selector tool-btn" data-type="erase">❌ Poista</button>
   </div>
-  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.2</button>
+  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.3</button>
 </div>
 
 <canvas id="map"></canvas>
@@ -96,7 +96,7 @@
   const canvas = document.getElementById('map');
   const ctx = canvas.getContext('2d');
 
-  const CURRENT_VERSION = "v2.3.2";
+  const CURRENT_VERSION = "v2.3.3";
 
   let userLoggedIn = false, gridMoveMode = false, markerMode = "none", capturedAreas = {}, freeMarkers = {}, gridOffset = {x:0, y:0}, scale = 0.15, offsetX = 0, offsetY = 0, lastMouse = {x:0, y:0}, isDragging = false, isDraggingGrid = false, selectedGrid = {gx:null, gy:null}, currentColor = "rgba(0, 255, 0, 0.5)", GRID_SIZE = 25, bX = 1700, bY = 3700, hoverMarker = null;
 
@@ -124,34 +124,51 @@
     }
 
     for (let key in capturedAreas) { let [gx, gy] = key.split(',').map(Number); ctx.fillStyle = capturedAreas[key].color; ctx.fillRect(gx*GRID_SIZE + gridOffset.x, gy*GRID_SIZE + gridOffset.y, GRID_SIZE, GRID_SIZE); }
+    
     for (let id in freeMarkers) {
-        const m = freeMarkers[id]; let emoji = ""; let col = "";
+        const m = freeMarkers[id];
+        let emoji = "";
+        let col = "";
         const hoursPassed = (Date.now() - m.createdAt) / 3600000;
-        if (m.type === "orange") { if (hoursPassed >= 14) { emoji = "✅"; col = "#2ecc71"; } else { emoji = "🔥"; col = "#e67e22"; } } else { emoji = "🌿"; col = "#27ae60"; }
-        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = "white"; ctx.lineWidth = 1/scale; ctx.stroke();
-        ctx.font = `${16/scale}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(emoji, m.x, m.y);
-        if (m.type === "yellow") { if (hoursPassed >= 5) { emoji = "✅"; col = "#2ecc71"; } else { emoji = "🍍"; col = "#e67e22"; } } else { emoji = "🌿"; col = "#27ae60"; }
-        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
+
+        if (m.type === "orange") {
+            if (hoursPassed >= 14) { emoji = "✅"; col = "#2ecc71"; } 
+            else { emoji = "🔥"; col = "#e67e22"; }
+        } else if (m.type === "yellow") {
+            if (hoursPassed >= 5) { emoji = "✅"; col = "#2ecc71"; } 
+            else { emoji = "🍍"; col = "#f1c40f"; }
+        } else {
+            emoji = "🌿"; col = "#27ae60";
+        }
+
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = "white"; ctx.lineWidth = 1/scale; ctx.stroke();
         ctx.font = `${16/scale}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(emoji, m.x, m.y);
     }
+
     if (selectedGrid.gx !== null) { ctx.strokeStyle = "white"; ctx.lineWidth = 3/scale; ctx.strokeRect(selectedGrid.gx*GRID_SIZE + gridOffset.x, selectedGrid.gy*GRID_SIZE + gridOffset.y, GRID_SIZE, GRID_SIZE); }
     ctx.restore();
 
     if (hoverMarker) {
         const now = Date.now();
         const created = hoverMarker.createdAt;
-        const diffMs = (created + (14 * 3600000)) - now;
+        let diffMs = 0;
+
+        if (hoverMarker.type === "orange") diffMs = (created + (14 * 3600000)) - now;
+        if (hoverMarker.type === "yellow") diffMs = (created + (5 * 3600000)) - now;
+
         const date = new Date(created);
         const timeStr = `Luotu: ${date.toLocaleDateString('fi-FI')} klo ${date.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}`;
+        
         ctx.font = "bold 13px Segoe UI";
         let lines = [];
-        if (hoverMarker.type === "orange" && diffMs > 0) {
+        if (diffMs > 0 && (hoverMarker.type === "orange" || hoverMarker.type === "yellow")) {
             const h = Math.floor(diffMs / 3600000); const m = Math.floor((diffMs % 3600000) / 60000);
             lines.push(`Valmis: ${h}h ${m}m`);
         }
         lines.push(timeStr);
+        
         const padding = 10; const lineHeight = 18;
         let maxWidth = 0; lines.forEach(l => { maxWidth = Math.max(maxWidth, ctx.measureText(l).width); });
         ctx.fillStyle = "rgba(0,0,0,0.95)"; ctx.strokeStyle = "#ff0000"; ctx.lineWidth = 2;
@@ -227,6 +244,3 @@
 </script>
 </body>
 </html>
-
-
-
