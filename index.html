@@ -7,14 +7,33 @@
   <style>
     body { margin: 0; background:#0a0a0a; color:#eee; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
     #versionWarning { position: fixed; top: 65px; left: 0; right: 0; background: #ff0000; color: #fff; text-align: center; padding: 10px; font-weight: bold; z-index: 2000; display: none; box-shadow: 0 4px 15px rgba(255,0,0,0.5); border-bottom: 2px solid #fff; }
+    
+    /* Ehdotusikkuna */
+    #suggestionModal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; max-height: 80vh; background: #0d0000; border: 2px solid #600000; border-radius: 12px; z-index: 4000; display: none; flex-direction: column; padding: 20px; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+    #suggestionList { flex-grow: 1; overflow-y: auto; margin-bottom: 15px; border-top: 1px solid #300000; padding-top: 10px; }
+    .suggestion-item { background: #1a0000; padding: 8px; margin-bottom: 8px; border-radius: 4px; border-left: 3px solid #600000; font-size: 13px; display: flex; justify-content: space-between; align-items: flex-start; line-height: 1.4; }
+    .del-sugg { color: #ff0000; cursor: pointer; font-weight: bold; margin-left: 10px; display: none; padding: 0 5px; }
+    .is-admin .del-sugg { display: inline; }
+    #suggestionInput { width: 100%; background: #000; border: 1px solid #400000; color: #eee; padding: 10px; border-radius: 4px; box-sizing: border-box; resize: none; outline: none; }
+    #suggestionInput:focus { border-color: #ff0000; }
+    
+    /* UI Elementit */
     #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 5000; display: none; }
     .login-card { background: #0d0000; border: 2px solid #600000; padding: 40px; border-radius: 12px; width: 320px; text-align: center; box-shadow: 0 0 40px rgba(255, 0, 0, 0.3); }
     .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #400000; background: #000; color: #0f0; outline: none; box-sizing: border-box; }
     .login-card button { width: 100%; padding: 12px; background: #600000; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    
     #header { position: fixed; top: 0; left: 0; right: 0; height: 65px; background: #000; border-bottom: 2px solid #400000; display: flex; align-items: center; padding: 0 20px; z-index: 1000; justify-content: space-between; }
     .logo { color: #ff0000; font-size: 26px; font-weight: 900; letter-spacing: 2px; }
+    
+    /* Paneelit */
+    #leftActions { position: fixed; top: 85px; left: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+    .action-btn { background: rgba(0,0,0,0.9); border: 1px solid #600000; color: white; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    .action-btn:hover { background: #600000; transform: scale(1.05); }
+
     #adminSidePanel { position: fixed; top: 85px; right: 20px; width: 230px; background: rgba(10, 0, 0, 0.95); border: 1px solid #500000; padding: 15px; border-radius: 8px; z-index: 1000; display: none; flex-direction: column; gap: 12px; }
     .is-admin #adminSidePanel { display: flex; }
+    
     .panel-section { border-bottom: 1px solid #300000; padding-bottom: 10px; }
     .section-title { color: #e67e22; font-size: 10px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
     .tool-btn { background: #220000; color: white; border: 1px solid #500000; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 11px; font-weight: bold; width: 100%; margin-bottom: 4px; }
@@ -22,6 +41,7 @@
     .coord-input { width: 48%; padding: 5px; background: #000; border: 1px solid #555; color: #0f0; font-family: monospace; font-size: 12px; margin-bottom: 5px; }
     .swatch { width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 1px solid #000; }
     .swatch.active { border: 2px solid white; box-shadow: 0 0 10px white; }
+    
     #bottomLeftUI { position: fixed; bottom: 20px; left: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
     .glass-box { background: rgba(0,0,0,0.85); border: 1px solid #400000; padding: 12px; border-radius: 8px; font-size: 12px; min-width: 160px; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
     .legend-title { color: #ff0000; font-weight: bold; border-bottom: 1px solid #333; margin-bottom: 5px; padding-bottom: 3px; display: block; }
@@ -34,12 +54,27 @@
 <div id="versionWarning">⚠️ KARTASTA ON UUSI VERSIO! Päivitä sivu painamalla CTRL + F5 ⚠️</div>
 <div id="toast"></div>
 
+<div id="suggestionModal">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h3 style="margin:0; color:#ff0000; letter-spacing: 1px;">💡 EHDOTUKSET</h3>
+        <button onclick="document.getElementById('suggestionModal').style.display='none'" style="background:none; border:none; color:#777; cursor:pointer; font-size:22px;">✕</button>
+    </div>
+    <div id="suggestionList">Ladataan...</div>
+    <textarea id="suggestionInput" placeholder="Kirjoita anonyymi ehdotus tähän..." rows="3"></textarea>
+    <button id="sendSuggestion" style="margin-top:10px; background:#600000; color:white; border:none; padding:12px; border-radius:4px; font-weight:bold; cursor:pointer;">LÄHETÄ EHDOTUS</button>
+</div>
+
+<div id="leftActions">
+    <button class="action-btn" onclick="document.getElementById('suggestionModal').style.display='flex'">💡 Ehdotukset</button>
+</div>
+
 <div id="bottomLeftUI">
     <div class="glass-box">
         <span class="legend-title">INFO</span>
         🌿 = Kasvi paikka (Pysyvä)<br>
         🔥 = Kasvaa (14h laskuri)<br>
-        🍍 = Ananas kasvaa (5h laskuri)<br>
+        🍍 = Ananas (5h laskuri)<br>
+        🚬 = Sätkä (3h laskuri)<br>
         ✅ = Valmis kerättäväksi<br>
         <hr style="border:0; border-top:1px solid #333; margin:5px 0;">
         <span style="color:#0f0; font-size:10px;">Vie hiiri päälle nähdäksesi kellonajat.</span>
@@ -52,7 +87,7 @@
 
 <div id="loginOverlay"><div class="login-card"><h2>ADMIN LOGIN</h2><input type="email" id="loginEmail" placeholder="Sähköposti" value="admin@raid.com"><input type="password" id="loginPass" placeholder="Salasana"><button id="doLogin">KIRJAUDU</button></div></div>
 <div id="header">
-    <div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.3</span></div>
+    <div class="logo">RAIDERS <span style="font-size:10px; color:#444;" id="verLabel">v2.3.6</span></div>
     <div style="display:flex; gap:10px; align-items:center;">
         <div id="coords-val" style="font-family:monospace; color:#0f0; background:#111; padding:8px; border:1px solid #333; border-radius:4px; min-width:120px; text-align:center;">0, 0</div>
         <button id="authBtn" style="background:#400000; color:white; border:none; padding:10px 15px; border-radius:4px; cursor:pointer;">Admin</button>
@@ -72,13 +107,14 @@
   <div class="panel-section">
       <div class="section-title">Markkerit</div>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
-          <button class="m-selector tool-btn" data-type="green">🌿 Kasvi paikka</button>
+          <button class="m-selector tool-btn" data-type="green">🌿 Kasvi</button>
           <button class="m-selector tool-btn" data-type="orange">🔥 Kasvaa</button>
           <button class="m-selector tool-btn" data-type="yellow">🍍 Ananas</button>
+          <button class="m-selector tool-btn" data-type="gray">🚬 Sätkä</button>
       </div>
       <button class="m-selector tool-btn" data-type="erase">❌ Poista</button>
   </div>
-  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.3</button>
+  <button id="pushBtn" class="tool-btn" style="background:#4a148c; border-color:#9c27b0;">PUSH v2.3.6</button>
 </div>
 
 <canvas id="map"></canvas>
@@ -93,10 +129,11 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
   const dataRef = ref(db, 'live_map');
+  const suggRef = ref(db, 'live_map/suggestions');
   const canvas = document.getElementById('map');
   const ctx = canvas.getContext('2d');
 
-  const CURRENT_VERSION = "v2.3.3";
+  const CURRENT_VERSION = "v2.3.6";
 
   let userLoggedIn = false, gridMoveMode = false, markerMode = "none", capturedAreas = {}, freeMarkers = {}, gridOffset = {x:0, y:0}, scale = 0.15, offsetX = 0, offsetY = 0, lastMouse = {x:0, y:0}, isDragging = false, isDraggingGrid = false, selectedGrid = {gx:null, gy:null}, currentColor = "rgba(0, 255, 0, 0.5)", GRID_SIZE = 25, bX = 1700, bY = 3700, hoverMarker = null;
 
@@ -104,6 +141,33 @@
   document.getElementById('doLogin').onclick = () => { signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).then(() => document.getElementById('loginOverlay').style.display='none').catch(() => alert("Virhe!")); };
   document.getElementById('authBtn').onclick = () => userLoggedIn ? signOut(auth) : document.getElementById('loginOverlay').style.display='flex';
 
+  // --- EHDOTUKSET LOGIIKKA ---
+  document.getElementById('sendSuggestion').onclick = () => {
+    const text = document.getElementById('suggestionInput').value.trim();
+    if(!text) return;
+    push(suggRef, { text: text, timestamp: Date.now() }).then(() => {
+        document.getElementById('suggestionInput').value = "";
+        showToast("Ehdotus lähetetty anonyymisti!");
+    });
+  };
+
+  onValue(suggRef, (snapshot) => {
+    const list = document.getElementById('suggestionList');
+    list.innerHTML = "";
+    const data = snapshot.val();
+    if(!data) { list.innerHTML = "<p style='color:#555; font-size:12px;'>Ei vielä ehdotuksia.</p>"; return; }
+    Object.keys(data).reverse().forEach(id => {
+        const item = data[id];
+        const div = document.createElement('div');
+        div.className = "suggestion-item";
+        div.innerHTML = `<span>${item.text}</span><span class="del-sugg" onclick="window.removeSugg('${id}')">✕</span>`;
+        list.appendChild(div);
+    });
+  });
+
+  window.removeSugg = (id) => { if(confirm("Poistetaanko ehdotus?")) remove(ref(db, `live_map/suggestions/${id}`)); };
+
+  // --- KARTTA LOGIIKKA ---
   const tiles = []; let loadedTiles = 0;
   for (let y = 0; y < 8; y++) { for (let x = 0; x < 8; x++) { const img = new Image(); img.src = `gta_karttapalat/tile_${x}_${y}.png`; img.onload = () => { if(++loadedTiles === 64) { centerMap(); draw(); } }; tiles.push({ img, x, y }); } }
   function centerMap() { offsetX = (window.innerWidth/2)-(4096*scale); offsetY = (window.innerHeight/2)-(4096*scale); }
@@ -124,51 +188,33 @@
     }
 
     for (let key in capturedAreas) { let [gx, gy] = key.split(',').map(Number); ctx.fillStyle = capturedAreas[key].color; ctx.fillRect(gx*GRID_SIZE + gridOffset.x, gy*GRID_SIZE + gridOffset.y, GRID_SIZE, GRID_SIZE); }
-    
     for (let id in freeMarkers) {
         const m = freeMarkers[id];
-        let emoji = "";
-        let col = "";
+        let emoji = ""; let col = "";
         const hoursPassed = (Date.now() - m.createdAt) / 3600000;
-
-        if (m.type === "orange") {
-            if (hoursPassed >= 14) { emoji = "✅"; col = "#2ecc71"; } 
-            else { emoji = "🔥"; col = "#e67e22"; }
-        } else if (m.type === "yellow") {
-            if (hoursPassed >= 5) { emoji = "✅"; col = "#2ecc71"; } 
-            else { emoji = "🍍"; col = "#f1c40f"; }
-        } else {
-            emoji = "🌿"; col = "#27ae60";
-        }
-
-        ctx.fillStyle = col;
-        ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
+        if (m.type === "orange") { emoji = hoursPassed >= 14 ? "✅" : "🔥"; col = hoursPassed >= 14 ? "#2ecc71" : "#e67e22"; }
+        else if (m.type === "yellow") { emoji = hoursPassed >= 5 ? "✅" : "🍍"; col = hoursPassed >= 5 ? "#2ecc71" : "#f1c40f"; }
+        else if (m.type === "gray") { emoji = hoursPassed >= 3 ? "✅" : "🚬"; col = hoursPassed >= 3 ? "#2ecc71" : "#95a5a6"; }
+        else { emoji = "🌿"; col = "#27ae60"; }
+        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(m.x, m.y, 12/scale, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = "white"; ctx.lineWidth = 1/scale; ctx.stroke();
         ctx.font = `${16/scale}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(emoji, m.x, m.y);
     }
-
     if (selectedGrid.gx !== null) { ctx.strokeStyle = "white"; ctx.lineWidth = 3/scale; ctx.strokeRect(selectedGrid.gx*GRID_SIZE + gridOffset.x, selectedGrid.gy*GRID_SIZE + gridOffset.y, GRID_SIZE, GRID_SIZE); }
     ctx.restore();
 
     if (hoverMarker) {
         const now = Date.now();
         const created = hoverMarker.createdAt;
-        let diffMs = 0;
-
-        if (hoverMarker.type === "orange") diffMs = (created + (14 * 3600000)) - now;
-        if (hoverMarker.type === "yellow") diffMs = (created + (5 * 3600000)) - now;
-
+        // Määritetään odotusaika tyypin mukaan
+        let wait = (hoverMarker.type === "orange" ? 14 : (hoverMarker.type === "yellow" ? 5 : (hoverMarker.type === "gray" ? 3 : 0)));
+        let diffMs = wait ? (created + (wait * 3600000)) - now : 0;
         const date = new Date(created);
         const timeStr = `Luotu: ${date.toLocaleDateString('fi-FI')} klo ${date.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}`;
-        
         ctx.font = "bold 13px Segoe UI";
         let lines = [];
-        if (diffMs > 0 && (hoverMarker.type === "orange" || hoverMarker.type === "yellow")) {
-            const h = Math.floor(diffMs / 3600000); const m = Math.floor((diffMs % 3600000) / 60000);
-            lines.push(`Valmis: ${h}h ${m}m`);
-        }
+        if (diffMs > 0) { const h = Math.floor(diffMs / 3600000); const m = Math.floor((diffMs % 3600000) / 60000); lines.push(`Valmis: ${h}h ${m}m`); }
         lines.push(timeStr);
-        
         const padding = 10; const lineHeight = 18;
         let maxWidth = 0; lines.forEach(l => { maxWidth = Math.max(maxWidth, ctx.measureText(l).width); });
         ctx.fillStyle = "rgba(0,0,0,0.95)"; ctx.strokeStyle = "#ff0000"; ctx.lineWidth = 2;
@@ -176,10 +222,7 @@
         ctx.fillRect(lastMouse.x + 15, lastMouse.y - 15, boxW, boxH);
         ctx.strokeRect(lastMouse.x + 15, lastMouse.y - 15, boxW, boxH);
         ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.textBaseline = "top";
-        lines.forEach((line, i) => {
-            ctx.fillStyle = (i === 0 && lines.length > 1) ? "#e67e22" : "#fff";
-            ctx.fillText(line, lastMouse.x + 15 + padding, lastMouse.y - 15 + padding/2 + (i * lineHeight));
-        });
+        lines.forEach((line, i) => { ctx.fillStyle = (i === 0 && lines.length > 1) ? "#e67e22" : "#fff"; ctx.fillText(line, lastMouse.x + 15 + padding, lastMouse.y - 15 + padding/2 + (i * lineHeight)); });
     }
   }
 
@@ -196,7 +239,6 @@
     const wx = (e.clientX - offsetX)/scale, wy = (e.clientY - offsetY)/scale;
     if (e.button === 2) { isDragging = true; lastMouse = {x:e.clientX, y:e.clientY}; return; }
     if (gridMoveMode && userLoggedIn) { isDraggingGrid = true; lastMouse = {x:e.clientX, y:e.clientY}; return; }
-    
     if (userLoggedIn && markerMode !== "none") {
         if(markerMode === "erase") { for(let id in freeMarkers) if(Math.hypot(freeMarkers[id].x-wx, freeMarkers[id].y-wy) < 20/scale) remove(ref(db, `live_map/free_markers/${id}`)); }
         else { push(ref(db, 'live_map/free_markers'), { x:wx, y:wy, type:markerMode, createdAt: Date.now() }); }
@@ -209,14 +251,8 @@
   document.querySelectorAll('.m-selector').forEach(b => {
       b.onclick = () => {
           const type = b.dataset.type;
-          if (markerMode === type) {
-              markerMode = "none";
-              b.classList.remove('active');
-          } else {
-              document.querySelectorAll('.m-selector').forEach(x => x.classList.remove('active'));
-              b.classList.add('active');
-              markerMode = type;
-          }
+          if (markerMode === type) { markerMode = "none"; b.classList.remove('active'); } 
+          else { document.querySelectorAll('.m-selector').forEach(x => x.classList.remove('active')); b.classList.add('active'); markerMode = type; }
       };
   });
 
