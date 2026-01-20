@@ -140,7 +140,8 @@ Sovelluksessa on sisäänrakennettu \*\*Push\*\*-toiminto. Kun koodiin tehdään
 
 
 
-\*\*Kehittäjä:\*\* Raiders Dev Team  
+\*\*Kehittäjä:\*\* FINRR Dev Team  
 
 \*\*Versio:\*\* 2.3.6 (Build 2026)
+
 
